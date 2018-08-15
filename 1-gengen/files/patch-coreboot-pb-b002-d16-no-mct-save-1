@@ -1,0 +1,45 @@
+diff --git a/src/northbridge/amd/amdmct/mct_ddr3/mct_d.c b/src/northbridge/amd/amdmct/mct_ddr3/mct_d.c
+index da803ff..b542c1b 100644
+--- a/src/northbridge/amd/amdmct/mct_ddr3/mct_d.c
++++ b/src/northbridge/amd/amdmct/mct_ddr3/mct_d.c
+@@ -5816,7 +5816,9 @@ static void mct_preInitDCT(struct MCTStatStruc *pMCTstat,
+ 				struct DCTStatStruc *pDCTstat)
+ {
+ 	u8 err_code;
++#if 0
+ 	uint8_t nvram;
++#endif
+ 	uint8_t allow_config_restore;
+ 
+ 	/* Preconfigure DCT0 */
+@@ -5847,9 +5849,10 @@ static void mct_preInitDCT(struct MCTStatStruc *pMCTstat,
+ 
+ 	/* Check to see if restoration of SPD data from NVRAM is allowed */
+ 	allow_config_restore = 0;
++#if 0
+ 	if (get_option(&nvram, "allow_spd_nvram_cache_restore") == CB_SUCCESS)
+ 		allow_config_restore = !!nvram;
+-
++#endif
+ #if IS_ENABLED(CONFIG_HAVE_ACPI_RESUME)
+ 	if (pMCTstat->nvram_checksum != calculate_nvram_mct_hash())
+ 		allow_config_restore = 0;
+diff --git a/src/northbridge/amd/amdmct/mct_ddr3/s3utils.c b/src/northbridge/amd/amdmct/mct_ddr3/s3utils.c
+index 4100b26..42d9f4b 100644
+--- a/src/northbridge/amd/amdmct/mct_ddr3/s3utils.c
++++ b/src/northbridge/amd/amdmct/mct_ddr3/s3utils.c
+@@ -1146,12 +1146,12 @@ int8_t save_mct_information_to_nvram(void)
+ 	}
+ 
+ 	spi_flash_volatile_group_begin(&flash);
+-
++#if 0
+ 	/* Erase and write data structure */
+ 	spi_flash_erase(&flash, s3nv_offset, CONFIG_S3_DATA_SIZE);
+ 	spi_flash_write(&flash, s3nv_offset,
+ 			sizeof(struct amd_s3_persistent_data), persistent_data);
+-
++#endif
+ 	/* Deallocate temporary data structures */
+ 	free(persistent_data);
+ 

@@ -1,0 +1,32 @@
+diff --git a/support/download/dl-wrapper b/support/download/dl-wrapper
+index f944b71..0c36a37 100755
+--- a/support/download/dl-wrapper
++++ b/support/download/dl-wrapper
+@@ -19,6 +19,10 @@
+ # We want to catch any unexpected failure, and exit immediately.
+ set -e
+ 
++ARGV=("$@")
++declare -p ARGV >>/tmp/buildroot-dl-wrapper-log
++echo "buildroot_dl_wrapper_log_entry" >>/tmp/buildroot-dl-wrapper-log
++
+ main() {
+     local OPT OPTARG
+     local backend output hfile recurse quiet
+@@ -46,6 +50,16 @@ main() {
+         error "no output specified, use -o\n"
+     fi
+ 
++    local allow1='^lzip-'
++    if [[ "$(basename "$output")" =~ $allow1 ]]
++    then
++      true # continue to actually download
++      exit # huh? why was this needed?
++    else
++      touch "$output"
++      exit
++    fi
++
+     # If the output file already exists and:
+     # - there's no .hash file: do not download it again and exit promptly
+     # - matches all its hashes: do not download it again and exit promptly

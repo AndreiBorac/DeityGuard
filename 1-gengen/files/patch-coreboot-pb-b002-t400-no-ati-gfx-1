@@ -1,0 +1,87 @@
+diff --git a/src/mainboard/lenovo/t400/romstage.c b/src/mainboard/lenovo/t400/romstage.c
+index f5d5dd1..e68fa5a 100644
+--- a/src/mainboard/lenovo/t400/romstage.c
++++ b/src/mainboard/lenovo/t400/romstage.c
+@@ -63,6 +63,72 @@ static void early_lpc_setup(void)
+ 	pci_write_config32(LPC_DEV, D31F0_GEN3_DEC, 0x1c1681);
+ }
+ 
++#define HYBRID_GRAPHICS_GP_LVL_BITS 0x004a0000
++#define HYBRID_GRAPHICS_GP_LVL2_BITS 0x00020000
++
++#define HYBRID_GRAPHICS_DETECT_GP_BITS 0x00000010
++
++#define HYBRID_GRAPHICS_INT_CLAIM_VGA 0x2
++#define HYBRID_GRAPHICS_SEC_VGA_EN 0x2
++
++static void hybrid_graphics_set_up_gpio(void)
++{
++	uint32_t tmp;
++
++	/* Enable hybrid graphics GPIO lines */
++	tmp = inl(DEFAULT_GPIOBASE + GP_IO_USE_SEL);
++	tmp = tmp | HYBRID_GRAPHICS_GP_LVL_BITS;
++	outl(tmp, DEFAULT_GPIOBASE + GP_IO_USE_SEL);
++
++	tmp = inl(DEFAULT_GPIOBASE + GP_IO_USE_SEL2);
++	tmp = tmp | HYBRID_GRAPHICS_GP_LVL2_BITS;
++	outl(tmp, DEFAULT_GPIOBASE + GP_IO_USE_SEL2);
++
++	/* Set hybrid graphics control GPIO lines to output */
++	tmp = inl(DEFAULT_GPIOBASE + GP_IO_SEL);
++	tmp = tmp & ~HYBRID_GRAPHICS_GP_LVL_BITS;
++	outl(tmp, DEFAULT_GPIOBASE + GP_IO_SEL);
++
++	tmp = inl(DEFAULT_GPIOBASE + GP_IO_SEL2);
++	tmp = tmp & ~HYBRID_GRAPHICS_GP_LVL2_BITS;
++	outl(tmp, DEFAULT_GPIOBASE + GP_IO_SEL2);
++
++	/* Set hybrid graphics detect GPIO lines to input */
++	tmp = inl(DEFAULT_GPIOBASE + GP_IO_SEL);
++	tmp = tmp | HYBRID_GRAPHICS_DETECT_GP_BITS;
++	outl(tmp, DEFAULT_GPIOBASE + GP_IO_SEL);
++}
++
++static void hybrid_graphics_configure_switchable_graphics_false(void)
++{
++	uint32_t tmp;
++
++		/* Enable integrated graphics legacy VGA cycles */
++		tmp = pci_read_config16(MCH_DEV, D0F0_GGC);
++		pci_write_config16(MCH_DEV, D0F0_GGC, tmp & ~HYBRID_GRAPHICS_INT_CLAIM_VGA);
++
++		/* Disable secondary VGA controller */
++		tmp = pci_read_config16(MCH_DEV, D0F0_DEVEN);
++		pci_write_config16(MCH_DEV, D0F0_DEVEN, tmp & ~HYBRID_GRAPHICS_SEC_VGA_EN);
++}
++
++static void hybrid_graphics_switch_to_integrated_graphics(void)
++{
++	uint32_t tmp;
++
++	/* Disable switchable graphics */
++	hybrid_graphics_configure_switchable_graphics_false();
++
++	/* Configure muxes */
++	tmp = inl(DEFAULT_GPIOBASE + GP_LVL);
++	tmp = tmp & ~HYBRID_GRAPHICS_GP_LVL_BITS;
++	outl(tmp, DEFAULT_GPIOBASE + GP_LVL);
++
++	tmp = inl(DEFAULT_GPIOBASE + GP_LVL2);
++	tmp = tmp & ~HYBRID_GRAPHICS_GP_LVL2_BITS;
++	outl(tmp, DEFAULT_GPIOBASE + GP_LVL2);
++}
++
+ void mainboard_romstage_entry(unsigned long bist)
+ {
+ 	sysinfo_t sysinfo;
+@@ -97,6 +163,9 @@ void mainboard_romstage_entry(unsigned long bist)
+ 
+ 	setup_pch_gpios(&t400_gpio_map);
+ 
++	hybrid_graphics_set_up_gpio();
++	hybrid_graphics_switch_to_integrated_graphics();
++
+ 	/* ASPM related setting, set early by original BIOS. */
+ 	DMIBAR16(0x204) &= ~(3 << 10);
+ 

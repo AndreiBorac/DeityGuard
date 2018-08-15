@@ -1,0 +1,13 @@
+diff --git a/src/Makefile.in b/src/Makefile.in
+index 25e8434..a2e2c49 100644
+--- a/src/Makefile.in
++++ b/src/Makefile.in
+@@ -29,7 +29,7 @@ mpsse.o: support.o
+ 	$(CC) $(CFLAGS) $(LDFLAGS) -DLIBFTDI1=$(LIBFTDI1) -c mpsse.c
+ 
+ fast.o: support.o
+-	$(CC) $(CFLAGS) $(LDFLAGS) -c fast.c
++	$(CC) $(CFLAGS) $(LDFLAGS) -DLIBFTDI1=$(LIBFTDI1) -c fast.c
+ 
+ support.o:
+ 	$(CC) $(CFLAGS) $(LDFLAGS) -DLIBFTDI1=$(LIBFTDI1) -c support.c

@@ -1,0 +1,67 @@
+diff --git a/Kconfig b/Kconfig
+index c13f48d..8d4fa3f 100644
+--- a/Kconfig
++++ b/Kconfig
+@@ -9,3 +9,10 @@ config SRCARCH
+ 	option env="SRCARCH"
+ 
+ source "arch/$SRCARCH/Kconfig"
++
++menu "Extra kernel modules"
++
++config FLUSH_DATA_CACHE
++	tristate "flush_data_cache"
++
++endmenu
+diff --git a/Makefile b/Makefile
+index e963063..b587f7a 100644
+--- a/Makefile
++++ b/Makefile
+@@ -941,7 +941,7 @@ endif
+ 
+ 
+ ifeq ($(KBUILD_EXTMOD),)
+-core-y		+= kernel/ certs/ mm/ fs/ ipc/ security/ crypto/ block/
++core-y		+= kernel/ certs/ mm/ fs/ ipc/ security/ crypto/ block/ extra/
+ 
+ vmlinux-dirs	:= $(patsubst %/,%,$(filter %/, $(init-y) $(init-m) \
+ 		     $(core-y) $(core-m) $(drivers-y) $(drivers-m) \
+diff --git a/extra/Makefile b/extra/Makefile
+new file mode 100644
+index 0000000..43f9a7a
+--- /dev/null
++++ b/extra/Makefile
+@@ -0,0 +1 @@
++obj-$(CONFIG_FLUSH_DATA_CACHE) += flush_data_cache.o
+diff --git a/extra/flush_data_cache.c b/extra/flush_data_cache.c
+new file mode 100644
+index 0000000..31b5a0c
+--- /dev/null
++++ b/extra/flush_data_cache.c
+@@ -0,0 +1,26 @@
++#include <linux/kernel.h>
++#include <linux/module.h>
++#include <asm/cacheflush.h>
++
++static int  __init flush_data_cache_init(void)
++{
++  pr_info("init\n");
++  
++  flush_cache_all();
++  
++  pr_info("done\n");
++  
++  return 0;
++}
++
++static void __exit flush_data_cache_exit(void)
++{
++  pr_info("exit\n");
++}
++
++module_init(flush_data_cache_init);
++module_exit(flush_data_cache_exit);
++
++MODULE_LICENSE("GPL");
++MODULE_AUTHOR("me");
++MODULE_DESCRIPTION("flush_data_cache");

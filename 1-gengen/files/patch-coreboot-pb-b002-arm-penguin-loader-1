@@ -1,0 +1,313 @@
+diff --git a/src/lib/prog_loaders.c b/src/lib/prog_loaders.c
+index 128869b..d317334 100644
+--- a/src/lib/prog_loaders.c
++++ b/src/lib/prog_loaders.c
+@@ -168,8 +168,308 @@ void __attribute__((weak)) mirror_payload(struct prog *payload)
+ {
+ }
+ 
++// enter arm-penguin-loader
++
++#include <delay.h>
++#include <arch/io.h>
++
++#if IS_ENABLED(CONFIG_BOARD_EMULATION_QEMU_ARMV7)
++#define AT { printk(BIOS_SPEW, "reached (%s)[%d]\n", __FILE__, __LINE__); }
++#else
++#define AT { }
++#endif
++
++/*
++  changes and adaptations copyright (c) 2017 by Andrei Borac and
++  freely distributed under the terms of the GNU General Public License
++  as published by the Free Software Foundation; either version 2 of
++  the License, or (at your option) any later version.
++ */
++
++#define STRLEN(x) ({ static const char __strlen[] = (x ""); (sizeof(__strlen) - 1); })
++
++// copyright notice preserved for below function adapted from https://github.com/coreboot/depthcharge/blob/master/src/drivers/video/rk3288.c
++/*
++ * Copyright 2014 Rockchip Electronics Co., Ltd.
++ *
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License as
++ * published by the Free Software Foundation; either version 2 of
++ * the License, or (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but without any warranty; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++static void arm_penguin_loader_rk3288_display_stop(void)
++{
++	static uint32_t VOP_STANDBY_EN = 1;
++	static uint32_t VOP_STANDBY_OFFSET = 22;
++
++	static uint32_t *vop0_sys_ctrl = (uint32_t *)0xff930008;
++	static uint32_t *vop1_sys_ctrl = (uint32_t *)0xff940008;
++
++	/* set vop0 to standby */
++	setbits_le32(vop0_sys_ctrl, VOP_STANDBY_EN << VOP_STANDBY_OFFSET);
++
++	/* set vop1 to standby */
++	setbits_le32(vop1_sys_ctrl, VOP_STANDBY_EN << VOP_STANDBY_OFFSET);
++
++	/* wait frame complete (60Hz) to enter standby */
++	mdelay(17);
++}
++
++// copyright notice preserved for below function adapted from https://github.com/coreboot/depthcharge/blob/master/src/arch/arm/boot_asm.S
++/*
++ * Copyright 2013 Google Inc.
++ *
++ * See file CREDITS for list of people who contributed to this
++ * project.
++ *
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License as
++ * published by the Free Software Foundation; either version 2 of
++ * the License, or (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but without any warranty; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++__asm__
++(
++ ".arm\n"
++ ".global arm_penguin_loader_boot_arm_linux_jump_asm\n"
++ ".type   arm_penguin_loader_boot_arm_linux_jump_asm, function\n"
++ "        arm_penguin_loader_boot_arm_linux_jump_asm:\n"
++ /* Entered with R0 = &fdt, R1 = entry */
++ 
++ /* Linux ABI expects SVC mode (0x13) with IRQ(7) and FIQ(6) disabled */
++ "msr	cpsr_cxf, #0xd3\n"
++ 
++ /* CAREFUL: Stack pointer (SVC banked) will be invalid from here on! */
++ "mov	r3, r1\n"		/* save entry pointer */
++ "mov	r1, #-1\n"		/* R1 = 0xffffffff (Invalid Machine Type) */
++ "mov	r2, r0\n"		/* R2 = &fdt */
++ "eor	r0, r0\n"		/* R0 = 0 (ABI-mandated for some odd reason) */
++ "mov	pc, r3\n"		/* jump to entry pointer */
++);
++
++extern void arm_penguin_loader_boot_arm_linux_jump(void* dtb, void* zim) __asm__("arm_penguin_loader_boot_arm_linux_jump_asm");
++
++// copyright notice preserved for below 3 functions adapted from https://github.com/coreboot/depthcharge/blob/master/src/arch/arm/boot.c
++/*
++ * Copyright 2013 Google Inc.
++ *
++ * See file CREDITS for list of people who contributed to this
++ * project.
++ *
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License as
++ * published by the Free Software Foundation; either version 2 of
++ * the License, or (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++static inline uint32_t arm_penguin_loader_get_sctlr(void)
++{
++	uint32_t val;
++	asm("mrc p15, 0, %0, c1, c0, 0" : "=r" (val));
++	return val;
++}
++
++static inline void arm_penguin_loader_set_sctlr(uint32_t val)
++{
++	asm volatile("mcr p15, 0, %0, c1, c0, 0" :: "r" (val));
++	asm volatile("" ::: "memory");
++}
++
++static void arm_penguin_loader_boot_arm_linux(void* zim, void* dtb)
++{
++  static const uint32_t SctlrM = (0x1 << 0);
++  static const uint32_t SctlrC = (0x1 << 2);
++  
++  uint32_t sctlr = arm_penguin_loader_get_sctlr();
++  
++  // Flush dcache and icache to make loaded code visible.
++  cache_sync_instructions();
++  
++  // Turn off the MMU.
++  sctlr &= ~SctlrM;
++  
++  // Disable the data/unified cache.
++  sctlr &= ~SctlrC;
++  
++  arm_penguin_loader_set_sctlr(sctlr);
++  
++  tlb_invalidate_all();
++  
++  arm_penguin_loader_boot_arm_linux_jump(dtb, zim);
++}
++
++static void arm_penguin_loader_boot(void* zim, void* dtb, void* ird)
++{
++  arm_penguin_loader_rk3288_display_stop();
++  
++  arm_penguin_loader_boot_arm_linux(zim, dtb);
++}
++
++// "copyright" notice preserved for below function adapted from https://github.com/yonik/java_util/blob/master/src/util/hash/MurmurHash3.java
++/**
++ *  The MurmurHash3 algorithm was created by Austin Appleby and placed in the public domain.
++ *  This java port was authored by Yonik Seeley and also placed into the public domain.
++ *  The author hereby disclaims copyright to this source code.
++ *  <p>
++ *  This produces exactly the same hash values as the final C++
++ *  version of MurmurHash3 and is thus suitable for producing the same hash values across
++ *  platforms.
++ *  <p>
++ *  The 32 bit x86 version of this hash should be the fastest variant for relatively short keys like ids.
++ *  murmurhash3_x64_128 is a good choice for longer strings or if you need more than 32 bits of hash.
++ *  <p>
++ *  Note - The x86 and x64 versions do _not_ produce the same results, as the
++ *  algorithms are optimized for their respective platforms.
++ *  <p>
++ *  See http://github.com/yonik/java_util for future updates to this file.
++ */
++static uint32_t arm_penguin_loader_murmur3_32(uint32_t const* key_x4, uintptr_t len, uint32_t h)
++{
++  uint32_t const c1 = 0xcc9e2d51;
++  uint32_t const c2 = 0x1b873593;
++  uint32_t const c3 = 0xe6546b64;
++  uint32_t const c4 = 0x85ebca6b;
++  uint32_t const c5 = 0xc2b2ae35;
++  
++  uintptr_t i = (len >> 2);
++  
++  while (i--) {
++    uint32_t k = (*(key_x4++));
++    k *= c1;
++    k = (k << 15) | (k >> 17);
++    k *= c2;
++    h ^= k;
++    h = (h << 13) | (h >> 19);
++    h = (h * 5) + c3;
++  }
++  
++  h ^= len;
++  
++  h ^= h >> 16;
++  h *= c4;
++  h ^= h >> 13;
++  h *= c5;
++  h ^= h >> 16;
++  
++  return h;
++}
++
++#define ARM_PENGUIN_LOADER_MAGIC "De8m9UqGsNieAGWB"
++
++__attribute__((used))
++static void arm_penguin_loader_try_boot(unsigned char* staging)
++{
++  struct {
++    unsigned char header[STRLEN(ARM_PENGUIN_LOADER_MAGIC)];
++    
++    uintptr_t sum;
++    
++    struct {
++      struct {
++        uintptr_t dst;
++        uintptr_t src; // relative to header[0]
++        uintptr_t len;
++        uintptr_t sum;
++      } zim, dtb, ird;
++    } dir;
++  } *u;
++  AT;
++  u = ((__typeof__(u))(staging));
++  AT;
++  // check header magic
++  {
++    if (!(memcmp((u->header), ARM_PENGUIN_LOADER_MAGIC, STRLEN(ARM_PENGUIN_LOADER_MAGIC)) == 0)) {
++      AT; return;
++    }
++  }
++  AT;
++  // wipe header magic (one boot attempt only)
++  {
++    memset((u->header), 0, STRLEN(ARM_PENGUIN_LOADER_MAGIC));
++  }
++  AT;
++  // check directory checksum
++  {
++    if (!(arm_penguin_loader_murmur3_32(((uintptr_t*)(&(u->dir))), sizeof(u->dir), 0) == (u->sum))) {
++      AT; return;
++    }
++  }
++  AT;
++  // load entries
++  {
++    void ea(__typeof__(&(u->dir.zim)) ent) {
++      //printk(BIOS_SPEW, "memcpy(0x%p, 0x%p, %d)\n", ((void*)(ent->dst)), ((void*)(((uintptr_t)(staging)) + (ent->src))), (ent->len));
++      memcpy(((void*)(ent->dst)), ((void*)(((uintptr_t)(staging)) + (ent->src))), (ent->len));
++    }
++    
++    AT; ea((&(u->dir.zim)));
++    AT; ea((&(u->dir.dtb)));
++    AT; ea((&(u->dir.ird)));
++  }
++  AT;
++  // checksum loaded entries
++  {
++    bool ea(__typeof__(&(u->dir.zim)) ent) {
++      return (arm_penguin_loader_murmur3_32(((uintptr_t*)(ent->dst)), (ent->len), 0) == (ent->sum));
++    }
++    
++    AT; if (!(ea((&(u->dir.zim))))) { AT; return; }
++    AT; if (!(ea((&(u->dir.dtb))))) { AT; return; }
++    AT; if (!(ea((&(u->dir.ird))))) { AT; return; }
++  }
++  AT;
++  // boot!
++  {
++    arm_penguin_loader_boot(((void*)(u->dir.zim.dst)), ((void*)(u->dir.dtb.dst)), ((void*)(u->dir.ird.dst)));
++  }
++}
++
++__attribute__((used))
++static void arm_penguin_loader(void)
++{
++#if IS_ENABLED(CONFIG_BOARD_EMULATION_QEMU_ARMV7)
++#define BA_STAGING 0x9f800000
++#else
++#define BA_STAGING 0x20000000
++#endif
++  AT;
++  unsigned char* staging = ((unsigned char*)(BA_STAGING));
++  AT;
++  arm_penguin_loader_try_boot(staging);
++  AT;
++  {
++    struct cbfsf file;
++    struct region_device rdev;
++    if (cbfs_boot_locate((&file), "penguin.bin", NULL)) { AT; goto arm_penguin_loader_failed; }
++    cbfs_file_data((&rdev), (&file));
++    if (rdev_readat((&rdev), staging, 0, region_device_sz((&rdev))) != region_device_sz((&rdev))) { AT; goto arm_penguin_loader_failed; }
++    arm_penguin_loader_try_boot(staging);
++  }
++  AT;
++ arm_penguin_loader_failed:
++  AT;
++  while (1);
++}
++
++// leave arm-penguin-loader
++
+ void payload_load(void)
+ {
++	arm_penguin_loader();
++
+ 	struct prog *payload = &global_payload;
+ 
+ 	timestamp_add_now(TS_LOAD_PAYLOAD);

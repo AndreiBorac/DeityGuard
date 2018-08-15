@@ -1,0 +1,8 @@
+key generation is slow enough on bpi boards that it noticably slows
+booting.
+
+therefore, empty files are placed here to block actual key generation
+for the unused host key types (dsa, ecdsa and rsa).
+
+update: now for ed25519 also. why not block them all until sshd is
+properly configured?

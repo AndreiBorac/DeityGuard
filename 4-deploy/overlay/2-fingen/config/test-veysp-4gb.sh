@@ -1,0 +1,24 @@
+MACHINE_NAME=test_veysp_4gb
+
+FINHUB_VARSET=test
+
+#include model-veysp-4gb
+#include fetch-local
+
+function f_defs()
+{
+  ROOTSHADOW='*'
+  TZDATA_TZ=GMT
+  PKEY_COMMON='# pubkey goes here'
+  PKEY_ROOT="$PKEY_COMMON"
+  PKEY_USER="$PKEY_COMMON"
+}
+
+#include arm-common
+
+INSTIGATOR_EMMC_PROBE_WORKAROUND=y
+
+CLASSICAL_INSERT_EMMC_PROBE_WORKAROUND=n
+
+CLASSICAL_LANDER_EMMC_PROBE_WORKAROUND=y
+CLASSICAL_LANDER_EMMC_LOCKED_WORKAROUND=y

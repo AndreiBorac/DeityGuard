@@ -1,0 +1,39 @@
+diff --git a/src/optionroms.c b/src/optionroms.c
+index 65f7fe0..c3827b1 100644
+--- a/src/optionroms.c
++++ b/src/optionroms.c
+@@ -310,7 +310,7 @@ fail:
+ 
+ // Attempt to map and initialize the option rom on a given PCI device.
+ static void
+-init_pcirom(struct pci_device *pci, int isvga, u64 *sources)
++init_pcirom_old(struct pci_device *pci, int isvga, u64 *sources)
+ {
+     dprintf(4, "Attempting to init PCI bdf %pP (vd %04x:%04x)\n"
+             , pci, pci->vendor, pci->device);
+@@ -331,6 +331,7 @@ init_pcirom(struct pci_device *pci, int isvga, u64 *sources)
+     init_optionrom(rom, pci->bdf, isvga);
+ }
+ 
++static void init_pcirom(struct pci_device *pci, int isvga, u64 *sources) { }
+ 
+ /****************************************************************
+  * Non-VGA option rom init
+@@ -352,7 +353,7 @@ optionrom_setup(void)
+     foreachpci(pci) {
+         if (pci->class == PCI_CLASS_DISPLAY_VGA || pci->have_driver)
+             continue;
+-        init_pcirom(pci, 0, sources);
++        //init_pcirom(pci, 0, sources);
+     }
+ 
+     // Find and deploy CBFS roms not associated with a device.
+@@ -424,7 +425,7 @@ vgarom_setup(void)
+         if (!is_pci_vga(pci))
+             continue;
+         vgahook_setup(pci);
+-        init_pcirom(pci, 1, NULL);
++        //init_pcirom(pci, 1, NULL);
+         break;
+     }
+ 

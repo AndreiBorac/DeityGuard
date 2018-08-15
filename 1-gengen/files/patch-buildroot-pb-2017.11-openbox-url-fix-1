@@ -1,0 +1,15 @@
+diff --git a/package/openbox/openbox.mk b/package/openbox/openbox.mk
+index 91d1c86..fdaa1c5 100644
+--- a/package/openbox/openbox.mk
++++ b/package/openbox/openbox.mk
+@@ -5,8 +5,8 @@
+ ################################################################################
+ 
+ OPENBOX_VERSION = 3.6.1
+-OPENBOX_SOURCE = openbox-$(OPENBOX_VERSION).tar.xz
+-OPENBOX_SITE = http://openbox.org/dist/openbox
++OPENBOX_SOURCE = openbox-$(OPENBOX_VERSION).tar.gz
++OPENBOX_SITE = https://ftp.osuosl.org/pub/blfs/conglomeration/openbox
+ OPENBOX_LICENSE = GPL-2.0+
+ OPENBOX_LICENSE_FILES = COPYING
+ 

@@ -1,0 +1,1500 @@
+diff --git a/net-misc/tightvnc/Manifest b/net-misc/tightvnc/Manifest
+new file mode 100644
+index 00000000..2c81f28
+--- /dev/null
++++ b/net-misc/tightvnc/Manifest
+@@ -0,0 +1,2 @@
++DIST tightvnc-1.3.10_javasrc.tar.gz 89641 SHA256 465a6c90d362029152ea16d0b8e2c29f772b06eeec6c561278390f73d64ec6ec SHA512 e33366b45f06b6522dce79e2f43bc4d7ffa00577f7a1a56026f9e869de7e61838093fdc7e9c4dace326652d9416c2267f6d211ac639095ffd1c4ba38dddb8851 WHIRLPOOL 8ba7a6545a105687989f469400d0d76d68e6a1f33462cf4aa725282d8c6c5ebd01a2c0f269dbd924a9272af81423321a85be8b24abf484962d990b21138d3451
++DIST tightvnc-1.3.10_unixsrc.tar.bz2 1780510 SHA256 f48c70fea08d03744ae18df6b1499976362f16934eda3275cead87baad585c0d SHA512 b5b3d5d532feffc07db2d48d3416e1a0d1b1b15bdb8ff801ed42042d4b99f34365e10e3b005bc15cc6e0a33c429db8976c227a1854e1af5e10bcb60e17a69b87 WHIRLPOOL 3ede45e5e480c93384d331f80beefac723925014cf29f94b4b12c3ce6d78daca38ff7f4279411db76c83dca0ab1733310b877836e55a5f2084e826dbabbe1d23
+diff --git a/net-misc/tightvnc/files/1.3.10-sparc.patch b/net-misc/tightvnc/files/1.3.10-sparc.patch
+new file mode 100644
+index 00000000..26b7bdda
+--- /dev/null
++++ b/net-misc/tightvnc/files/1.3.10-sparc.patch
+@@ -0,0 +1,24 @@
++diff -ur vnc_unixsrc.orig/Xvnc/programs/Xserver/include/servermd.h vnc_unixsrc/Xvnc/programs/Xserver/include/servermd.h
++--- vnc_unixsrc.orig/Xvnc/programs/Xserver/include/servermd.h	2009-11-04 18:44:50.000000000 +0000
+++++ vnc_unixsrc/Xvnc/programs/Xserver/include/servermd.h	2009-11-04 18:47:48.000000000 +0000
++@@ -421,6 +421,20 @@
++ 
++ #endif /* Linux/PPC */
++ 
+++#if defined (linux) && defined(__sparc__)
+++
+++#define IMAGE_BYTE_ORDER       MSBFirst
+++#define BITMAP_BIT_ORDER       MSBFirst
+++#define GLYPHPADBYTES          4
+++#define GETLEFTBITS_ALIGNMENT  1
+++
+++#define AVOID_MEMORY_READ 
+++#define LARGE_INSTRUCTION_CACHE
+++#define FAST_CONSTANT_OFFSET_MODE
+++#define SHARED_IDCACHE
+++
+++#endif /* Linux/sparc */
+++
++ #if defined(__MACH__) && defined(__POWERPC__)
++ 
++ #define IMAGE_BYTE_ORDER       MSBFirst
+\ No newline at end of file
+diff --git a/net-misc/tightvnc/files/1.3.9-arm.patch b/net-misc/tightvnc/files/1.3.9-arm.patch
+new file mode 100644
+index 00000000..a238e29
+--- /dev/null
++++ b/net-misc/tightvnc/files/1.3.9-arm.patch
+@@ -0,0 +1,12 @@
++diff -ur vnc_unixsrc.orig/Xvnc/config/cf/Imake.cf vnc_unixsrc/Xvnc/config/cf/Imake.cf
++--- vnc_unixsrc.orig/Xvnc/config/cf/Imake.cf	2008-09-24 18:50:40.000000000 +0200
+++++ vnc_unixsrc/Xvnc/config/cf/Imake.cf	2008-09-24 18:51:37.000000000 +0200
++@@ -711,7 +711,7 @@
++ #  undef __alpha__
++ # endif /* __alpha__ */
++ # ifdef __arm__
++-#  define Arm32Architecture
+++#  define ArmArchitecture
++ #  undef arm
++ #  undef __arm
++ #  undef __arm__
+diff --git a/net-misc/tightvnc/files/1.3.9-fbsd.patch b/net-misc/tightvnc/files/1.3.9-fbsd.patch
+new file mode 100644
+index 00000000..bc527a8
+--- /dev/null
++++ b/net-misc/tightvnc/files/1.3.9-fbsd.patch
+@@ -0,0 +1,29 @@
++--- Xvnc/include/Xos.bak        2007-03-23 18:26:14 +0100
+++++ Xvnc/include/Xos.h  2007-03-23 18:26:22 +0100
++@@ -150,11 +150,6 @@
++ #endif
++ #endif /* X_NOT_POSIX else */
++
++-#ifdef CSRG_BASED
++-#include <stdlib.h>
++-#include <unistd.h>
++-#endif /* CSRG_BASED */
++-
++ /*
++  * Get struct timeval
++  */
++ 
++--- Xvnc/config/imake/imakemdep.h~      2003-02-19 09:39:54 -0700
+++++ Xvnc/config/imake/imakemdep.h       2007-06-27 09:54:44 -0600
++@@ -253,7 +253,10 @@
++ #ifdef _CRAY
++ #define DEFAULT_CPP "/lib/pcpp"
++ #endif
++-#if defined(__386BSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__FreeBSD__)
+++#if defined(__FreeBSD__)
+++#define DEFAULT_CPP "/usr/bin/cpp"
+++#endif
+++#if defined(__386BSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
++ #define DEFAULT_CPP "/usr/libexec/cpp"
++ #endif
++ #if defined(__sgi) && defined(__ANSI_CPP__)
+diff --git a/net-misc/tightvnc/files/1.3.9-sh.patch b/net-misc/tightvnc/files/1.3.9-sh.patch
+new file mode 100644
+index 00000000..db76917
+--- /dev/null
++++ b/net-misc/tightvnc/files/1.3.9-sh.patch
+@@ -0,0 +1,28 @@
++diff -ur vnc_unixsrc.orig/Xvnc/config/cf/linux.cf vnc_unixsrc/Xvnc/config/cf/linux.cf
++--- vnc_unixsrc.orig/Xvnc/config/cf/linux.cf	2009-01-01 11:41:14.000000000 +0100
+++++ vnc_unixsrc/Xvnc/config/cf/linux.cf	2009-01-01 11:44:08.000000000 +0100
++@@ -43,7 +43,8 @@
++ #if defined(AlphaArchitecture) || defined(PowerPCArchitecture) || \
++     defined(SparcArchitecture) || defined(ArmArchitecure) || \
++     defined(i386Architecture) || defined(s390Architecture) || \
++-    defined(s390xArchitecture) || defined(MipsArchitecture)
+++    defined(s390xArchitecture) || defined(MipsArchitecture) || \
+++    defined(SuperHArchitecture)
++ #define DefaultLinuxCLibMajorVersion	6
++ #else
++ #define DefaultLinuxCLibMajorVersion	5
++@@ -312,6 +313,14 @@
++ #define ServerExtraDefines	-DGCCUSESGAS XFree86ServerDefines
++ #endif /* Arm */
++ 
+++#ifdef SuperHArchitecture
+++#define DefaultCCOptions	-fsigned-char
+++#define OptimizedCDebugFlags	-O2
+++#define LinuxMachineDefines	-D__sh__
+++#define ServerOSDefines		XFree86ServerOSDefines -DDDXTIME -DPART_NET
+++#define ServerExtraDefines	-DGCCUSESGAS XFree86ServerDefines
+++#endif /* SuperH */
+++
++ #ifdef SparcArchitecture
++ #define OptimizedCDebugFlags	-O2
++ #define LinuxMachineDefines 	-D__sparc__
+\ No newline at end of file
+diff --git a/net-misc/tightvnc/files/README.JavaViewer b/net-misc/tightvnc/files/README.JavaViewer
+new file mode 100644
+index 00000000..acb96bd
+--- /dev/null
++++ b/net-misc/tightvnc/files/README.JavaViewer
+@@ -0,0 +1,423 @@
++
++TightVNC Java Viewer version 1.2.7
++==================================
++
++Copyright (C) 2001,2002 HorizonLive.com, Inc.  All Rights Reserved.
++Copyright (C) 2001,2002 Constantin Kaplinsky.  All Rights Reserved.
++Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
++
++This software is distributed under the GNU General Public Licence as
++published by the Free Software Foundation. See the file LICENCE.TXT for the
++conditions under which this software is made available. TightVNC also
++contains code from other sources. See the Acknowledgements section below, and
++the individual files for details of the conditions under which they are made
++available.
++
++
++Compiling from the sources
++==========================
++
++To compile all the .java files to .class files, simply do:
++
++	% make all
++
++This will also generate a JAR (Java archive) file containing all the classes. 
++Most JVM (Java Virtual Machine) implementations are able to use either a set
++of .class files, or the JAR archive.
++
++
++Installation
++============
++
++There are three basic ways to use TightVNC Java viewer:
++
++  1. Running applet as part of TightVNC server installation.
++
++     Both the Unix and Windows versions of TightVNC servers include small
++     built-in HTTP server which can serve Java viewer to Web clients. This
++     enables easy Web access to the shared desktop without need to install
++     any software on the client computer. Unix and Windows versions of
++     TightVNC servers are different in the way they store the .class and .jar
++     files: the Unix server (Xvnc) is able to serve any set of files present
++     in a particular directory, while the Windows server (WinVNC) has all the
++     .class and .jar files inside the WinVNC executable file. Therefore, for
++     Xvnc, it's enough to copy the files into a correct directory, but for
++     WinVNC, the server binaries should be rebuild if the built-in Java
++     viewer should be updated.
++
++     To install the Java viewer under Xvnc, copy all the .class files, the
++     .jar file and the .vnc files to an installation directory (e.g.
++     /usr/local/vnc/classes):
++
++         cp *.class *.jar *.vnc /usr/local/vnc/classes
++
++     Also, make sure that the vncserver script is configured to point to the
++     installation directory (see the Xvnc manual page for the description of
++     the -httpd command-line option).
++
++  2. Running applet hosted on a standalone Web server.
++
++     Another possibility to use the Java viewer is to install it under a
++     fully-functional HTTP server such as Apache or IIS. Obviously, this
++     method requires running an HTTP server, and due to the Java security
++     restrictions, it's also required that the server should be installed on
++     the same machine which is running the TightVNC server. In this case,
++     installation is simply copying the .class and .jar files into a
++     directory that is under control of the HTTP server. Also, an HTML page
++     should be created which will act as a the base document for the viewer
++     applet (see an example named index.html in this distribution).
++
++  3. Running the viewer as a standalone application.
++
++     Finally, the Java viewer can be executed locally on the client machine,
++     but this method requires installation of either JRE (Java Runtime
++     Environment) or JDK (Java Development Kit). If all the .class files are
++     in the current directory, the Java viewer can be executed like this,
++     from the command line:
++
++         java VncViewer HOST vnchost PORT 5900
++
++     The parameters HOST and PORT are required, but there is a number of
++     optional parameters as well (see the Parameters section below).
++
++Parameters
++==========
++
++TightVNC Java viewer supports a number of parameters allowing you to
++customize its behaviour. Most parameter names copy settings available from
++the Options frame in the Java viewer. Both parameter names and their values
++are case-insensitive, with one exception for the "PASSWORD" parameter. Here
++is the full list of parameters supported in TightVNC Java viewer:
++
++--> "HOST" (no GUI equivalent)
++
++    Value: host name or IP address of the VNC server.
++    Default: in applet mode, the host from which the applet was loaded.
++
++    This parameter tells the viewer which server to connect to. Normally,
++    it's not needed, because default Java security policy allow connections
++    from applets to the only one host anyway, and that is the host from which
++    the applet was loaded.
++
++--> "PORT" (no GUI equivalent)
++
++    Value: TCP port number on the VNC server.
++    Default: none.
++
++    This parameter is required in all cases. Note that this port is not the
++    one used for HTTP connection from the browser, it is the port used for
++    RFB connection. Usually, VNC servers use ports 58xx for HTTP connections,
++    and ports 59xx for RFB connections. Thus, most likely, this parameter
++    should be set to something like 5900, 5901 etc.
++
++--> "PASSWORD"
++
++    Value: session password in plan text.
++    Default: none, ask user.
++
++    DO NOT EVER USE THIS PARAMETER, unless you really know what you are
++    doing. It's extremely dangerous from the security point of view. When
++    this parameter is set, the viewer won't ever ask for a password.
++
++--> "ENCPASSWORD"
++
++    Value: encrypted session password in hex-ascii.
++    Default: none, ask user.
++
++    The same as the "PASSWORD" parameter but DES-encrypted using a fixed key.
++    Its value should be represented in hex-ascii e.g. "494015f9a35e8b22".
++    This parameter has higher priority over the "PASSWORD" parameter. DO NOT
++    EVER USE THIS PARAMETER, unless you really know what you are doing. It's
++    extremely dangerous from the security point of view, and encryption does
++    not actually help here since the decryption key is always known.
++
++--> "Encoding"
++
++    Values: "Raw", "RRE", "CoRRE", "Hextile", "Zlib", "Tight".
++    Default: "Tight".
++
++    The preferred encoding. "Hextile" is a good choice for fast networks,
++    while "Tight" is better suited for low-bandwidth connections. From the
++    other side, the "Tight" decoder in TightVNC Java viewer seems to be more
++    efficient than "Hextile" decoder so it's possible that this default
++    setting can be ok for fast networks too.
++
++--> "Compression level"
++
++    Values: "Default", "1", "2", "3", "4", "5", "6", "7", "8", "9".
++    Default: "Default". ;-)
++
++    Use specified compression level for "Tight" and "Zlib" encodings. Level 1
++    uses minimum of CPU time on the server but achieves weak compression
++    ratios. Level 9 offers best compression but may be slow in terms of CPU
++    time consumption on the server side. Use high levels with very slow
++    network connections, and low levels when working over higher-speed
++    networks. The "Default" value means that the server's default compression
++    level should be used.
++
++--> "JPEG image quality"
++
++    Values: "JPEG off", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9".
++    Default: "6".
++
++    Use the specified image quality level in "Tight" encoding. Quality level
++    0 denotes bad image quality but very impressive compression ratios, while
++    level 9 offers very good image quality at lower compression ratios. If
++    the value is "JPEG off", the server will not use lossy JPEG compression
++    in "Tight" encoding.
++
++--> "Cursor shape updates"
++
++    Values: "Enable", "Ignore", "Disable".
++    Default: "Enable".
++
++    Cursor shape updates is a protocol extension used to handle remote cursor
++    movements locally on the client side, saving bandwidth and eliminating
++    delays in mouse pointer movement. Note that current implementation of
++    cursor shape updates does not allow a client to track mouse cursor
++    position at the server side. This means that clients would not see mouse
++    cursor movements if mouse was moved either locally on the server, or by
++    another remote VNC client. Set this parameter to "Disable" if you always
++    want to see real cursor position on the remote side. Setting this option
++    to "Ignore" is similar to "Enable" but the remote cursor will not be
++    visible at all. This can be a reasonable setting if you don't care about
++    cursor shape and don't want to see two mouse cursors, one above another.
++
++--> "Use CopyRect"
++
++    Values: "Yes", "No".
++    Default: "Yes".
++
++    The "CopyRect" encoding saves bandwidth and drawing time when parts of
++    the remote screen are moving around. Most likely, you don't want to
++    change this setting.
++
++--> "Restricted colors"
++
++    Values: "Yes", "No".
++    Default: "No".
++
++    If set to "No", then 24-bit color format is used to represent pixel data. 
++    If set to "Yes", then only 8 bits are used to represent each pixel. 8-bit
++    color format can save bandwidth, but colors may look very inaccurate.
++
++--> "Mouse buttons 2 and 3"
++
++    Values: "Normal", "Reversed".
++    Default: "Normal".
++
++    If set to "Reversed", then right mouse button (button 2) will act as it
++    was middle mouse button (button 3), and vice versa.
++
++--> "View only"
++
++    Values: "Yes", "No".
++    Default: "No".
++
++    If set to "Yes", then all keyboard and mouse events in the desktop window
++    will be silently ignored and will not be passed to the remote side.
++
++--> "Share desktop"
++
++    Values: "Yes", "No".
++    Default: "Yes".
++
++    Share the connection with other clients on the same VNC server. The exact
++    behaviour in each case depends on the server configuration.
++
++--> "Open new window" (no GUI equivalent, applicable only in the applet mode)
++
++    Values: "Yes", "No".
++    Default: "No".
++
++    Operate in a separate window. This makes possible resizing the desktop,
++    and adds scroll bars when necessary. If the server supports variable
++    desktop size, the window will resize automatically when remote desktop
++    size changes.
++
++--> "Show controls" (no GUI equivalent)
++
++    Values: "Yes", "No".
++    Default: "Yes".
++
++    Set to "No" if you want to get rid of that button panel at the top.
++
++--> "Offer relogin" (no GUI equivalent, not applicable in the applet mode)
++
++    Values: "Yes", "No".
++    Default: "Yes".
++
++    If set to "No", the buttons "Login again" and "Close window" won't be
++    shown on disconnects or after an error has occured.
++
++--> "Show offline desktop" (no GUI equivalent)
++
++    Values: "Yes", "No".
++    Default: "No".
++
++    If set to "Yes", the viewer would continue to display desktop even
++    if the remote side has closed the connection. In this case, if the
++    button panel is enabled, then the "Disconnect" button would be
++    changed to "Hide desktop" after the connection is lost.
++
++--> "Defer screen updates" (no GUI equivalent)
++
++    Value: time in milliseconds.
++    Default: "20".
++
++    When updating the desktop contents after receiving an update from server,
++    schedule repaint within the specified number of milliseconds. Small delay
++    helps to coalesce several small updates into one drawing operation,
++    improving CPU usage. Set this parameter to 0 to disable deferred updates.
++
++--> "Defer cursor updates" (no GUI equivalent)
++
++    Value: time in milliseconds.
++    Default: "10".
++
++    When updating the desktop after moving the mouse, schedule repaint within
++    the specified number of milliseconds. This setting makes sense only when
++    "Cursor shape updates" parameter is set to "Enable". Small delay helps to
++    coalesce several small updates into one drawing operation, improving CPU
++    usage. Set this parameter to 0 to disable deferred cursor updates.
++
++--> "Defer update requests" (no GUI equivalent)
++
++    Value: time in milliseconds.
++    Default: "50".
++
++    After processing an update received from server, wait for the specified
++    number of milliseconds before requesting next screen update. Such delay
++    will end immediately on every mouse or keyboard event if not in the "view
++    only" mode. Small delay helps the server to coalesce several small
++    updates into one framebuffer update, improving both bandwidth and CPU
++    usage. Increasing the parameter value does not affect responsiveness on
++    mouse and keyboard events, but causes delays in updating the screen when
++    there is no mouse and keyboard activity on the client side.
++
++--> "SocketFactory" (no GUI equivalent)
++
++    Value: name of the class.
++    Default: none.
++
++    This option provides the way to define an alternate I/O implementation.
++    The dynamically referenced class must implement a SocketFactory
++    interface, and create a Socket, as configured by this parameter. See the
++    source in the SocketFactory.class.
++
++
++RECORDING VNC SESSIONS
++======================
++
++Current version of the TightVNC Java viewer is able to record VNC (RFB)
++sessions in files for later playback. The data format in saved session files
++is compatible with the rfbproxy program written by Tim Waugh. Most important
++thing about session recording is that it's supported only if Java security
++manager allows access to local filesystem. Typically, it would not work for
++unsigned applets. To use this feature, either use TightVNC Java viewer as a
++standalone application (Java Runtime Environment or Java Development Kit
++should be installed), or as a signed applet. The code checks if it's possible
++to support session recording, and if everything's fine, the new "Record"
++button should appear in the button panel. Pressing this button opens new
++window which controls session recording. The GUI is pretty self-explained.
++
++Other important facts about session recording:
++
++--> All sessions are recorded in the 24-bit color format. If you use
++    restricted colors (8-bit format), it will be temporarly switched to
++    24-bit mode during session recording.
++
++--> All sessions are recorded with cursor shape updates turned off. This is
++    necessary to represent remote cursor movements in recorded sessions.
++
++--> Closing and re-opening the recording control window does not affect the
++    recording. It's not necessary to keep that window open during recording a
++    session.
++
++--> Avoid using Zlib encoding when recording sessions. It's ok if you started
++    recording BEFORE the connection to the VNC server has been established,
++    but if you started recording during an active session, all Zlib sessions
++    will be saved Raw-encoded (that is, without compression at all). Zlib
++    decoding depends on the pixel data received earlier, thus saving the data
++    received from the server at an arbitrary moment is not sufficient to
++    decompress it correctly. And there is no way to say Zlib decoder to reset
++    decompressor's state -- that's a limitation of the Zlib encoder. The
++    viewer could re-compress raw pixel data again before saving Zlib-encoded
++    sessions, but unfortunately Java API does not allow to flush zlib data
++    streams making it impossible to save Zlib-encoded RFB pixel data without
++    using native code.
++
++--> Usually, Tight encoding is the most suitable one for session recording,
++    but some of the issues described above for the Zlib encoding affect the
++    Tight encoding as well. Unlike Zlib sessions, Tight-encoded sessions are
++    always saved Tight-encoded, but the viewer has to re-compress parts of
++    data to synchronize encoder's and decoder's zlib streams. And, due to
++    Java zlib API limitations, zlib streams' states have to be reset on each
++    compressed rectangle, causing compression ratios to be lower than in the
++    original VNC session. If you want to achieve the best possible
++    performance, turn recording on BEFORE connecting to the VNC server,
++    otherwise CPU usage and compression ratios may be notably less efficient.
++
++
++HINTS
++=====
++
++--> To refresh remote desktop in the view-only mode, press "r" or "R"
++    on the keyboard.
++
++
++ACKNOWLEDGEMENTS
++================
++
++This distribution contains Java DES software by Dave Zimmerman
++<dzimm@widget.com> and Jef Poskanzer <jef@acme.com>.  This is:
++
++    Copyright (c) 1996 Widget Workshop, Inc. All Rights Reserved.
++
++    Permission to use, copy, modify, and distribute this software and its
++    documentation for NON-COMMERCIAL or COMMERCIAL purposes and without fee
++    is hereby granted, provided that this copyright notice is kept intact.
++    
++    WIDGET WORKSHOP MAKES NO REPRESENTATIONS OR WARRANTIES ABOUT THE
++    SUITABILITY OF THE SOFTWARE, EITHER EXPRESS OR IMPLIED, INCLUDING BUT
++    NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
++    PARTICULAR PURPOSE, OR NON-INFRINGEMENT. WIDGET WORKSHOP SHALL NOT BE
++    LIABLE FOR ANY DAMAGES SUFFERED BY LICENSEE AS A RESULT OF USING,
++    MODIFYING OR DISTRIBUTING THIS SOFTWARE OR ITS DERIVATIVES.
++    
++    THIS SOFTWARE IS NOT DESIGNED OR INTENDED FOR USE OR RESALE AS ON-LINE
++    CONTROL EQUIPMENT IN HAZARDOUS ENVIRONMENTS REQUIRING FAIL-SAFE
++    PERFORMANCE, SUCH AS IN THE OPERATION OF NUCLEAR FACILITIES, AIRCRAFT
++    NAVIGATION OR COMMUNICATION SYSTEMS, AIR TRAFFIC CONTROL, DIRECT LIFE
++    SUPPORT MACHINES, OR WEAPONS SYSTEMS, IN WHICH THE FAILURE OF THE
++    SOFTWARE COULD LEAD DIRECTLY TO DEATH, PERSONAL INJURY, OR SEVERE
++    PHYSICAL OR ENVIRONMENTAL DAMAGE ("HIGH RISK ACTIVITIES").  WIDGET
++    WORKSHOP SPECIFICALLY DISCLAIMS ANY EXPRESS OR IMPLIED WARRANTY OF
++    FITNESS FOR HIGH RISK ACTIVITIES.
++
++    Copyright (C) 1996 by Jef Poskanzer <jef@acme.com>.  All rights
++    reserved.
++
++    Redistribution and use in source and binary forms, with or without
++    modification, are permitted provided that the following conditions
++    are met:
++    1. Redistributions of source code must retain the above copyright
++       notice, this list of conditions and the following disclaimer.
++    2. Redistributions in binary form must reproduce the above copyright
++       notice, this list of conditions and the following disclaimer in the
++       documentation and/or other materials provided with the distribution.
++
++    THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
++    ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
++    IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
++    PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS
++    BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
++    CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
++    SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
++    BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
++    WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
++    OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
++    ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++
++    Visit the ACME Labs Java page for up-to-date versions of this and other
++    fine Java utilities: http://www.acme.com/java/
+diff --git a/net-misc/tightvnc/files/server-CVE-2007-1003.patch b/net-misc/tightvnc/files/server-CVE-2007-1003.patch
+new file mode 100644
+index 00000000..0f97c11
+--- /dev/null
++++ b/net-misc/tightvnc/files/server-CVE-2007-1003.patch
+@@ -0,0 +1,36 @@
++--- vnc_unixsrc/Xvnc/programs/Xserver/Xext/xcmisc.c.cve-2007-1003	2000-06-11 06:00:51.000000000 -0600
+++++ vnc_unixsrc/Xvnc/programs/Xserver/Xext/xcmisc.c	2007-03-22 07:07:34.000000000 -0600
++@@ -41,6 +41,12 @@ from the X Consortium.
++ #include "swaprep.h"
++ #include "xcmiscstr.h"
++ 
+++#if HAVE_STDINT_H
+++#include <stdint.h>
+++#elif !defined(UINT32_MAX)
+++#define UINT32_MAX 0xffffffffU
+++#endif
+++
++ static unsigned char XCMiscCode;
++ 
++ static void XCMiscResetProc(
++@@ -135,7 +141,10 @@ ProcXCMiscGetXIDList(client)
++ 
++     REQUEST_SIZE_MATCH(xXCMiscGetXIDListReq);
++ 
++-    pids = (XID *)ALLOCATE_LOCAL(stuff->count * sizeof(XID));
+++    if (stuff->count > UINT32_MAX / sizeof(XID))
+++	    return BadAlloc;
+++
+++    pids = (XID *)Xalloc(stuff->count * sizeof(XID));
++     if (!pids)
++     {
++ 	return BadAlloc;
++@@ -156,7 +165,7 @@ ProcXCMiscGetXIDList(client)
++     	client->pSwapReplyFunc = (ReplySwapPtr) Swap32Write;
++ 	WriteSwappedDataToClient(client, count * sizeof(XID), pids);
++     }
++-    DEALLOCATE_LOCAL(pids);
+++    Xfree(pids);
++     return(client->noClientException);
++ }
++ 
+diff --git a/net-misc/tightvnc/files/server-CVE-2007-1351-1352.patch b/net-misc/tightvnc/files/server-CVE-2007-1351-1352.patch
+new file mode 100644
+index 00000000..4c9a1ad
+--- /dev/null
++++ b/net-misc/tightvnc/files/server-CVE-2007-1351-1352.patch
+@@ -0,0 +1,49 @@
++--- vnc_unixsrc/Xvnc/lib/font/fontfile/fontdir.c.cve-2007-1351-1352	2000-06-11 06:00:53.000000000 -0600
+++++ vnc_unixsrc/Xvnc/lib/font/fontfile/fontdir.c	2007-03-28 16:08:03.000000000 -0600
++@@ -35,11 +35,19 @@ in this Software without prior written a
++ #include    "fntfilst.h"
++ #include    <X11/keysym.h>
++ 
+++#if HAVE_STDINT_H
+++#include <stdint.h>
+++#elif !defined(INT32_MAX)
+++#define INT32_MAX 0x7fffffff
+++#endif
+++	
++ Bool
++ FontFileInitTable (table, size)
++     FontTablePtr    table;
++     int		    size;
++ {
+++    if (size < 0 || (size > INT32_MAX/sizeof(FontEntryRec)))
+++	return FALSE;
++     if (size)
++     {
++ 	table->entries = (FontEntryPtr) xalloc(sizeof(FontEntryRec) * size);
++--- vnc_unixsrc/Xvnc/lib/font/bitmap/bdfread.c.cve-2007-1351-1352	2000-06-11 06:00:52.000000000 -0600
+++++ vnc_unixsrc/Xvnc/lib/font/bitmap/bdfread.c	2007-03-28 16:06:06.000000000 -0600
++@@ -59,6 +59,12 @@ from the X Consortium.
++ #include "bitmap.h"
++ #include "bdfint.h"
++ 
+++#if HAVE_STDINT_H
+++#include <stdint.h>
+++#elif !defined(INT32_MAX)
+++#define INT32_MAX 0x7fffffff
+++#endif
+++
++ #define INDICES 256
++ #define MAXENCODING 0xFFFF
++ #define BDFLINELEN  1024
++@@ -271,6 +277,11 @@ bdfReadCharacters(file, pFont, pState, b
++ 	bdfError("invalid number of CHARS in BDF file\n");
++ 	return (FALSE);
++     }
+++    if (nchars > INT32_MAX / sizeof(CharInfoRec)) {
+++	bdfError("Couldn't allocate pCI (%d*%d)\n", nchars,
+++		 sizeof(CharInfoRec));
+++	goto BAILOUT;
+++    }
++     ci = (CharInfoPtr) xalloc(nchars * sizeof(CharInfoRec));
++     if (!ci) {
++ 	bdfError("Couldn't allocate pCI (%d*%d)\n", nchars,
+diff --git a/net-misc/tightvnc/files/tightvnc-1.3.10-aarch64.patch b/net-misc/tightvnc/files/tightvnc-1.3.10-aarch64.patch
+new file mode 100644
+index 00000000..fa96b7d
+--- /dev/null
++++ b/net-misc/tightvnc/files/tightvnc-1.3.10-aarch64.patch
+@@ -0,0 +1,39 @@
++Description: Add aarch64 (arm64) support
++Author: Colin Watson <cjwatson@ubuntu.com>
++Forwarded: no
++Last-Update: 2014-03-18
++
++Index: b/Xvnc/config/cf/Imake.cf
++===================================================================
++--- a/Xvnc/config/cf/Imake.cf
+++++ b/Xvnc/config/cf/Imake.cf
++@@ -700,6 +700,10 @@
++ #   define s390Architecture
++ #  undef __s390__
++ # endif /* s390 */
+++# ifdef __aarch64__
+++#  define AArch64Architecture
+++#  undef __aarch64__
+++# endif /* __arch64__ */
++ # ifdef __alpha
++ #  define AlphaArchitecture
++ #  undef __alpha
++Index: b/Xvnc/config/cf/linux.cf
++===================================================================
++--- a/Xvnc/config/cf/linux.cf
+++++ b/Xvnc/config/cf/linux.cf
++@@ -305,6 +305,14 @@
++ #define ServerExtraDefines	-DGCCUSESGAS XFree86ServerDefines
++ #endif /* PowerPCArchitecture */
++ 
+++#ifdef AArch64Architecture
+++#define DefaultCCOptions	-fsigned-char
+++#define OptimizedCDebugFlags	-O2
+++#define LinuxMachineDefines	-D__aarch64__
+++#define ServerOSDefines		XFree86ServerOSDefines -DDDXTIME -DPART_NET
+++#define ServerExtraDefines	-DGCCUSESGAS XFree86ServerDefines -D_XSERVER64
+++#endif /* AArch64Architecture */
+++
++ #ifdef ArmArchitecture
++ #define DefaultCCOptions	-fsigned-char
++ #define OptimizedCDebugFlags	-O2
+diff --git a/net-misc/tightvnc/files/tightvnc-1.3.10-java-build.patch b/net-misc/tightvnc/files/tightvnc-1.3.10-java-build.patch
+new file mode 100644
+index 00000000..42815ac
+--- /dev/null
++++ b/net-misc/tightvnc/files/tightvnc-1.3.10-java-build.patch
+@@ -0,0 +1,20 @@
++diff -ur vnc_javasrc.orig/Makefile vnc_javasrc/Makefile
++--- vnc_javasrc.orig/Makefile	2009-03-07 14:15:55.000000000 +0100
+++++ vnc_javasrc/Makefile	2009-03-07 14:16:22.000000000 +0100
++@@ -4,7 +4,6 @@
++ 
++ CP = cp
++ JC = javac
++-JCFLAGS = -target 1.1 -source 1.2
++ JAR = jar
++ ARCHIVE = VncViewer.jar
++ MANIFEST = MANIFEST.MF
++@@ -32,7 +31,7 @@
++ all: $(CLASSES) $(ARCHIVE)
++ 
++ $(CLASSES): $(SOURCES)
++-	$(JC) $(JCFLAGS) -O $(SOURCES)
+++	$(JC) $(JAVACFLAGS) -O $(SOURCES)
++ 
++ $(ARCHIVE): $(CLASSES) $(MANIFEST)
++ 	$(JAR) cfm $(ARCHIVE) $(MANIFEST) $(CLASSES)
+diff --git a/net-misc/tightvnc/files/tightvnc-1.3.10-more-arm64-fixes.patch b/net-misc/tightvnc/files/tightvnc-1.3.10-more-arm64-fixes.patch
+new file mode 100644
+index 00000000..9dc275f
+--- /dev/null
++++ b/net-misc/tightvnc/files/tightvnc-1.3.10-more-arm64-fixes.patch
+@@ -0,0 +1,51 @@
++Description: more arm64 fixes
++Origin: https://bugs.debian.org/cgi-bin/bugreport.cgi?msg=37;bug=769364;filename=debian_arm64.patch;att=1
++Bug-Debian: http://bugs.debian.org/769364
++Bug-Ubuntu: http://bugs.launchpad.net/bugs/1429198
++Author: Riku Voipio <riku.voipio@linaro.org>
++Last-Update: 2016-03-23
++
++Index: tightvnc-1.3.9/Xvnc/include/Xmd.h
++===================================================================
++--- tightvnc-1.3.9.orig/Xvnc/include/Xmd.h
+++++ tightvnc-1.3.9/Xvnc/include/Xmd.h
++@@ -59,7 +59,7 @@ SOFTWARE.
++ #ifdef CRAY
++ #define WORD64				/* 64-bit architecture */
++ #endif
++-#if defined(__alpha) || defined(__alpha__) || defined(__x86_64__) || defined(__powerpc64__)
+++#if defined(__alpha) || defined(__alpha__) || defined(__x86_64__) || defined(__powerpc64__) || defined(__aarch64__)
++ #define LONG64				/* 32/64-bit architecture */
++ #endif
++ #ifdef __sgi
++Index: tightvnc-1.3.9/Xvnc/programs/Xserver/include/servermd.h
++===================================================================
++--- tightvnc-1.3.9.orig/Xvnc/programs/Xserver/include/servermd.h
+++++ tightvnc-1.3.9/Xvnc/programs/Xserver/include/servermd.h
++@@ -405,6 +405,26 @@ SOFTWARE.
++ 
++ #endif /* linux/m68k */
++ 
+++#if defined (linux) && defined(__aarch64__)
+++#  define BITMAP_SCANLINE_UNIT			64
+++# define BITMAP_SCANLINE_PAD 			64
+++# define LOG2_BITMAP_PAD			6
+++# define LOG2_BYTES_PER_SCANLINE_PAD		3
+++
+++/* Add for handling protocol XPutImage and XGetImage; see comment in
+++ * Alpha section.
+++ */
+++#define INTERNAL_VS_EXTERNAL_PADDING
+++#define BITMAP_SCANLINE_UNIT_PROTO		32
+++
+++#define BITMAP_SCANLINE_PAD_PROTO 	 	32
+++#define LOG2_BITMAP_PAD_PROTO			5
+++#define LOG2_BYTES_PER_SCANLINE_PAD_PROTO	2
+++#define GLYPHPADBYTES          4
+++#define GETLEFTBITS_ALIGNMENT  1
+++
+++#endif /* linux/aarch64 */
+++
++ #if defined (linux) && defined(__powerpc__)
++ 
++ #ifdef __powerpc64__
+diff --git a/net-misc/tightvnc/files/tightvnc-1.3.10-pathfixes.patch b/net-misc/tightvnc/files/tightvnc-1.3.10-pathfixes.patch
+new file mode 100644
+index 00000000..f61a749
+--- /dev/null
++++ b/net-misc/tightvnc/files/tightvnc-1.3.10-pathfixes.patch
+@@ -0,0 +1,16 @@
++--- vncserver.orig	2009-03-06 17:33:16.000000000 +0100
+++++ vncserver	2009-03-06 17:35:39.000000000 +0100
++@@ -32,10 +32,11 @@
++ $geometry = "1024x768";
++ $depth = 24;
++ $desktopName = "X";
++-$vncClasses = "/usr/local/vnc/classes";
+++$vncClasses = "/usr/share/tightvnc/classes";
++ $vncUserDir = "$ENV{HOME}/.vnc";
++-$fontPath = "unix/:7100";
+++$fontPath = "/usr/share/fonts/misc/,/usr/share/fonts/Type1/";
++ $authType = "-rfbauth $vncUserDir/passwd";
+++$colorPath = "/usr/share/X11/rgb";
++ 
++ # Read configuration from the system-wide and user files if present.
++ 
+diff --git a/net-misc/tightvnc/files/tightvnc-1.3.10-ppc64el-support.patch b/net-misc/tightvnc/files/tightvnc-1.3.10-ppc64el-support.patch
+new file mode 100644
+index 00000000..e05e5bc
+--- /dev/null
++++ b/net-misc/tightvnc/files/tightvnc-1.3.10-ppc64el-support.patch
+@@ -0,0 +1,99 @@
++From 25adb1614419b72a986c229cb01870c1b3e38c0b Mon Sep 17 00:00:00 2001
++From: Lauri Kasanen <cand@gmx.com>
++Date: Fri, 5 Jun 2015 07:45:09 -0300
++Subject: [PATCH 2/2] Add ppc64el support
++
++Signed-off-by: Lauri Kasanen <cand@gmx.com>
++---
++ Xvnc/config/cf/Imake.cf                  |  4 ++++
++ Xvnc/config/cf/linux.cf                  |  8 +++++++-
++ Xvnc/include/Xmd.h                       |  2 +-
++ Xvnc/programs/Xserver/include/servermd.h | 23 +++++++++++++++++++++++
++ 4 files changed, 35 insertions(+), 2 deletions(-)
++
++diff --git a/Xvnc/config/cf/Imake.cf b/Xvnc/config/cf/Imake.cf
++index f1f6724..cbe9ef3 100644
++--- a/Xvnc/config/cf/Imake.cf
+++++ b/Xvnc/config/cf/Imake.cf
++@@ -720,6 +720,10 @@ XCOMM Keep cpp from replacing path elements containing i486/i586/i686
++ #  define Mc68020Architecture
++ #  undef mc68000
++ # endif /* mc68000 */
+++# ifdef __powerpc64__
+++#  define Ppc64Architecture
+++#  undef __powerpc64__
+++# endif
++ # ifdef powerpc
++ #  define PpcArchitecture
++ #  undef powerpc
++diff --git a/Xvnc/config/cf/linux.cf b/Xvnc/config/cf/linux.cf
++index c0e2586..e5f1f2f 100644
++--- a/Xvnc/config/cf/linux.cf
+++++ b/Xvnc/config/cf/linux.cf
++@@ -289,7 +289,13 @@ XCOMM binutils:	(LinuxBinUtilsMajorVersion)
++ #define ServerExtraDefines	-DGCCUSESGAS XFree86ServerDefines
++ #endif /* s390xArchitecture */
++ 
++-#ifdef PowerPCArchitecture
+++#ifdef Ppc64Architecture
+++#define DefaultCCOptions        -fsigned-char
+++#define OptimizedCDebugFlags	-O2
+++#define LinuxMachineDefines 	-D__powerpc64__
+++#define ServerOSDefines		XFree86ServerOSDefines -DDDXTIME -DPART_NET
+++#define ServerExtraDefines	-DGCCUSESGAS XFree86ServerDefines -D_XSERVER64
+++#elif defined(PowerPCArchitecture)
++ #define DefaultCCOptions        -fsigned-char
++ #define OptimizedCDebugFlags	-O2
++ #define LinuxMachineDefines 	-D__powerpc__
++diff --git a/Xvnc/include/Xmd.h b/Xvnc/include/Xmd.h
++index 3cf9db1..704d252 100644
++--- a/Xvnc/include/Xmd.h
+++++ b/Xvnc/include/Xmd.h
++@@ -59,7 +59,7 @@ SOFTWARE.
++ #ifdef CRAY
++ #define WORD64				/* 64-bit architecture */
++ #endif
++-#if defined(__alpha) || defined(__alpha__) || defined(__x86_64__)
+++#if defined(__alpha) || defined(__alpha__) || defined(__x86_64__) || defined(__powerpc64__)
++ #define LONG64				/* 32/64-bit architecture */
++ #endif
++ #ifdef __sgi
++diff --git a/Xvnc/programs/Xserver/include/servermd.h b/Xvnc/programs/Xserver/include/servermd.h
++index 5066c1d..cc9f485 100644
++--- a/Xvnc/programs/Xserver/include/servermd.h
+++++ b/Xvnc/programs/Xserver/include/servermd.h
++@@ -407,8 +407,31 @@ SOFTWARE.
++ 
++ #if defined (linux) && defined(__powerpc__)
++ 
+++#ifdef __powerpc64__
+++#  define BITMAP_SCANLINE_UNIT			64
+++# define BITMAP_SCANLINE_PAD 			64
+++# define LOG2_BITMAP_PAD			6
+++# define LOG2_BYTES_PER_SCANLINE_PAD		3
+++
+++/* Add for handling protocol XPutImage and XGetImage; see comment in
+++ * Alpha section.
+++ */
+++#define INTERNAL_VS_EXTERNAL_PADDING
+++#define BITMAP_SCANLINE_UNIT_PROTO		32
+++
+++#define BITMAP_SCANLINE_PAD_PROTO 	 	32
+++#define LOG2_BITMAP_PAD_PROTO			5
+++#define LOG2_BYTES_PER_SCANLINE_PAD_PROTO	2
+++#endif /* linux/ppc64 */
+++
+++#if defined(__LITTLE_ENDIAN__)
+++#define IMAGE_BYTE_ORDER       LSBFirst
+++#define BITMAP_BIT_ORDER       LSBFirst
+++#else
++ #define IMAGE_BYTE_ORDER       MSBFirst
++ #define BITMAP_BIT_ORDER       MSBFirst
+++#endif
+++
++ #define GLYPHPADBYTES          4
++ #define GETLEFTBITS_ALIGNMENT  1
++ 
++-- 
++2.1.4
++
+diff --git a/net-misc/tightvnc/files/tightvnc-1.3.8-darwin.patch b/net-misc/tightvnc/files/tightvnc-1.3.8-darwin.patch
+new file mode 100644
+index 00000000..e5f7aa7
+--- /dev/null
++++ b/net-misc/tightvnc/files/tightvnc-1.3.8-darwin.patch
+@@ -0,0 +1,24 @@
++--- vnc_unixsrc/Xvnc/config/cf/darwin.cf.orig	2005-11-05 16:42:53.000000000 +0100
+++++ vnc_unixsrc/Xvnc/config/cf/darwin.cf	2005-11-05 16:46:52.000000000 +0100
++@@ -106,7 +106,6 @@
++ # endif
++ #endif
++ 
++-#define StandardDefines	-DCSRG_BASED
++ #define XawI18nDefines	-DUSE_XWCHAR_STRING -DUSE_XMBTOWC
++ 
++ 
++--- vnc_unixsrc/Xvnc/config/cf/vnclibs.def.orig	2005-11-05 17:11:41.000000000 +0100
+++++ vnc_unixsrc/Xvnc/config/cf/vnclibs.def	2005-11-05 17:17:21.000000000 +0100
++@@ -11,7 +11,11 @@
++ /* Avoid linking with different libjpeg in /usr/shlib under Tru64. */
++ VNCSYSLIBS = /usr/local/lib/libjpeg.a /usr/local/lib/libz.a -lcrypt
++ #else
+++# if HasLibCrypt == YES
++ VNCSYSLIBS = -L/usr/local/lib -ljpeg -lz -lcrypt
+++# else
+++VNCSYSLIBS = -L/usr/local/lib -ljpeg -lz
+++# endif
++ #endif
++ 
++ VNCCPPFLAGS = -I$(TOP)/../include -I/usr/local/include
+diff --git a/net-misc/tightvnc/files/tightvnc-1.3.8-imake-tmpdir.patch b/net-misc/tightvnc/files/tightvnc-1.3.8-imake-tmpdir.patch
+new file mode 100644
+index 00000000..9d5ccc5
+--- /dev/null
++++ b/net-misc/tightvnc/files/tightvnc-1.3.8-imake-tmpdir.patch
+@@ -0,0 +1,37 @@
++--- vnc_unixsrc/Xvnc/config/imake/imake.c.orig	2000-06-11 14:00:51.000000000 +0200
+++++ vnc_unixsrc/Xvnc/config/imake/imake.c	2003-09-01 22:59:25.000000000 +0200
++@@ -913,12 +913,25 @@
++ static void get_libc_version(inFile)
++   FILE* inFile;
++ {
++-  char *aout = tmpnam (NULL);
+++  char aout[PATH_MAX];
++   FILE *fp;
++   const char *format = "%s -o %s -x c -";
++   char *cc;
++   int len;
++   char *command;
+++  char *tmpdir;
+++  int tmpfd;
+++  
+++  if((tmpdir = getenv("TMPDIR")) != NULL && strlen(tmpdir) < (PATH_MAX-13))
+++    strcpy(aout, tmpdir);
+++  else
+++    strcpy(aout, "/tmp");
+++  strcat(aout, "/imakeXXXXXX");
+++  
+++  if((tmpfd = mkstemp(aout)) == -1) {
+++    perror("mkstemp");
+++    abort();
+++  }
++ 
++   cc = getenv ("CC");
++   if (cc == NULL)
++@@ -930,6 +943,7 @@
++   if (snprintf (command , len, format, cc, aout) == len)
++     abort ();
++ 
+++  close(tmpfd);
++   fp = popen (command, "w");
++   if (fp == NULL || fprintf (fp, "%s\n", libc_c) < 0
++       || pclose (fp) != 0)
+diff --git a/net-misc/tightvnc/files/tightvnc-1.3.8-mips.patch b/net-misc/tightvnc/files/tightvnc-1.3.8-mips.patch
+new file mode 100644
+index 00000000..422a998
+--- /dev/null
++++ b/net-misc/tightvnc/files/tightvnc-1.3.8-mips.patch
+@@ -0,0 +1,89 @@
++diff -cr vnc_unixsrc.orig/Xvnc/config/cf/linux.cf vnc_unixsrc/Xvnc/config/cf/linux.cf
++*** vnc_unixsrc.orig/Xvnc/config/cf/linux.cf	Wed Mar 20 02:49:23 2002
++--- vnc_unixsrc/Xvnc/config/cf/linux.cf	Sat Nov  4 19:01:06 2006
++***************
++*** 43,49 ****
++  #if defined(AlphaArchitecture) || defined(PowerPCArchitecture) || \
++      defined(SparcArchitecture) || defined(ArmArchitecure) || \
++      defined(i386Architecture) || defined(s390Architecture) || \
++!     defined(s390xArchitecture)
++  #define DefaultLinuxCLibMajorVersion	6
++  #else
++  #define DefaultLinuxCLibMajorVersion	5
++--- 43,49 ----
++  #if defined(AlphaArchitecture) || defined(PowerPCArchitecture) || \
++      defined(SparcArchitecture) || defined(ArmArchitecure) || \
++      defined(i386Architecture) || defined(s390Architecture) || \
++!     defined(s390xArchitecture) || defined(MipsArchitecture)
++  #define DefaultLinuxCLibMajorVersion	6
++  #else
++  #define DefaultLinuxCLibMajorVersion	5
++***************
++*** 261,266 ****
++--- 261,273 ----
++  #define ServerExtraDefines	-DGCCUSESGAS XFree86ServerDefines -D_XSERVER64
++  #endif /* AlphaArchitecture */
++  
+++ #ifdef MipsArchitecture
+++ #define OptimizedCDebugFlags	-O2
+++ #define LinuxMachineDefines	-D__mips__
+++ #define ServerOSDefines		XFree86ServerOSDefines -DDDXTIME -DPART_NET
+++ #define ServerExtraDefines	-DGCCUSESGAS XFree86ServerDefines
+++ #endif /* MipsArchitecture */
+++ 
++  #ifdef Mc68020Architecture
++  #define OptimizedCDebugFlags	-O2
++  #define LinuxMachineDefines 	-D__mc68000__
++diff -cr vnc_unixsrc.orig/Xvnc/programs/Xserver/cfb/Imakefile vnc_unixsrc/Xvnc/programs/Xserver/cfb/Imakefile
++*** vnc_unixsrc.orig/Xvnc/programs/Xserver/cfb/Imakefile	Tue Mar 19 21:16:03 2002
++--- vnc_unixsrc/Xvnc/programs/Xserver/cfb/Imakefile	Sat Nov  4 19:01:49 2006
++***************
++*** 10,24 ****
++  /* cfb8cppl.c MUST come last to avoid confusing makedepend */
++  PSZSRCS = cfb8bit.c cfbteblt8.c cfbglrop8.c cfbpush8.c cfbrctstp8.c cfb8cppl.c
++  PSZOBJS = cfb8bit.o cfbteblt8.o cfbglrop8.o cfbpush8.o cfbrctstp8.o cfb8cppl.o
++- #ifdef MipsArchitecture
++- #ifndef ArcArchitecture
++- #ifndef Mips64Architecture
++- STIPPLESRC = stipmips.s stipmipste.s
++- STIPPLEOBJ = stipmips.o stipmipste.o
++- STIPPLEDEF = -DHAS_STIPPLE_CODE
++- #endif
++- #endif
++- #endif
++  #ifdef SparcArchitecture
++  STIPPLESRC = stipsparc.s stipsparcte.s
++  STIPPLEOBJ = stipsparc.o stipsparcte.o
++--- 10,15 ----
++***************
++*** 128,136 ****
++  LinkSourceFile(cfbpush8.c,LinkDirectory)
++  LinkSourceFile(cfbrctstp8.c,LinkDirectory)
++  LinkSourceFile(cfbteblt8.c,LinkDirectory)
++- #ifdef MipsArchitecture
++- LinkSourceFile(stipmips.s,LinkDirectory)
++- #endif
++  #ifdef SparcArchitecture
++  LinkSourceFile(stipsparc.s,LinkDirectory)
++  #endif
++--- 119,124 ----
++***************
++*** 186,202 ****
++  #if PixelSize == 8
++  ObjectFromSpecialSource(cfbglrop8,cfbglblt8,-DGLYPHROP)
++  
++- #ifdef MipsArchitecture
++- stipmipste.s: stipmips.s
++- 	$(RM) $@
++- 	$(LN) stipmips.s stipmipste.s
++- clean::
++- 	$(RM) stipmipste.s
++- 
++- stipmipste.o: stipmipste.s
++- 	$(AS) -o $@ -DTETEXT stipmipste.s
++- #endif
++- 
++  #ifdef SparcArchitecture
++  stipsparcte.s: stipsparc.s
++  	$(RM) $@
++--- 174,179 ----
+diff --git a/net-misc/tightvnc/files/tightvnc-1.3.8-pathfixes.patch b/net-misc/tightvnc/files/tightvnc-1.3.8-pathfixes.patch
+new file mode 100644
+index 00000000..d9fa5aa
+--- /dev/null
++++ b/net-misc/tightvnc/files/tightvnc-1.3.8-pathfixes.patch
+@@ -0,0 +1,23 @@
++--- vncserver.old	2006-08-10 13:01:07.000000000 +0200
+++++ vncserver	2006-09-05 19:31:30.000000000 +0200
++@@ -36,16 +36,16 @@
++ $geometry = "1024x768";
++ $depth = 24;
++ $desktopName = "X";
++-$vncClasses = "/usr/local/vnc/classes";
+++$vncClasses = "/usr/share/tightvnc/classes";
++ $vncUserDir = "$ENV{HOME}/.vnc";
++-$fontPath = "unix/:7100";
+++$fontPath = "unix/:-1";
++ $authType = "-rfbauth $vncUserDir/passwd";
++ 
++ # Here is another example of setting the font path:
++-# $fontPath = "/usr/lib/X11/fonts/misc/,/usr/lib/X11/fonts/75dpi/";
+++$fontPath = "/usr/share/fonts/misc/,/usr/share/fonts/Type1/";
++ 
++ # X colors database path is optional, uncomment and edit to use:
++-# $colorPath = "/usr/lib/X11/rgb";
+++$colorPath = "/usr/share/X11/rgb";
++ 
++ # You might wish to make your vnc directory under /tmp, to make sure
++ # passwords are always kept on the local filesystem. To do that, just
+diff --git a/net-misc/tightvnc/files/tightvnc-1.3.9-java-build.patch b/net-misc/tightvnc/files/tightvnc-1.3.9-java-build.patch
+new file mode 100644
+index 00000000..8503a30
+--- /dev/null
++++ b/net-misc/tightvnc/files/tightvnc-1.3.9-java-build.patch
+@@ -0,0 +1,19 @@
++--- vnc_javasrc/Makefile.bak	2008-09-11 21:17:37.000000000 +1200
+++++ vnc_javasrc/Makefile	2008-09-11 21:18:30.000000000 +1200
++@@ -4,7 +4,6 @@
++ 
++ CP = cp
++ JC = javac
++-JCFLAGS = -target 1.1
++ JAR = jar
++ ARCHIVE = VncViewer.jar
++ MANIFEST = MANIFEST.MF
++@@ -32,7 +31,7 @@
++ all: $(CLASSES) $(ARCHIVE)
++ 
++ $(CLASSES): $(SOURCES)
++-	$(JC) $(JCFLAGS) -O $(SOURCES)
+++	$(JC) $(JAVACFLAGS) -O $(SOURCES)
++ 
++ $(ARCHIVE): $(CLASSES) $(MANIFEST)
++ 	$(JAR) cfm $(ARCHIVE) $(MANIFEST) $(CLASSES)
+diff --git a/net-misc/tightvnc/files/tightvnc.confd b/net-misc/tightvnc/files/tightvnc.confd
+new file mode 100644
+index 00000000..757f4b9
+--- /dev/null
++++ b/net-misc/tightvnc/files/tightvnc.confd
+@@ -0,0 +1,9 @@
++# Config file for /etc/init.d/vnc
++
++# Specify the user(s) Xvnc(1) should be run for. The syntax is: "username:display".
++# example: "DISPLAYS="foo:1 bar:2" You can specify more users separated by space.
++# DISPLAYS="myuser:1"
++
++# Specify any of vncserver(1) and Xvnc(1) options. See the respective man pages for more information.
++# VNC_OPTS=""
++
+diff --git a/net-misc/tightvnc/files/tightvnc.initd b/net-misc/tightvnc/files/tightvnc.initd
+new file mode 100644
+index 00000000..465b686
+--- /dev/null
++++ b/net-misc/tightvnc/files/tightvnc.initd
+@@ -0,0 +1,57 @@
++#!/sbin/openrc-run
++# Copyright 1999-2004 Gentoo Foundation
++# Distributed under the terms of the GNU General Public License, v2 or later
++# $Id$
++
++depend() {
++	need net
++}
++
++checkconfig() {
++	if [ -n "${DISPLAYS}" ]; then
++		if [ $1 = "start" ]; then
++			local user
++			for user in $DISPLAYS; do
++				if eval [ ! -f "~${user%%:*}/.vnc/passwd" ]; then
++					eerror "There are no passwords defined for user ${user%%:*}."
++					return 1
++				elif [ -e "/tmp/.X11-unix/X${user##*:}" ]; then
++					eerror "Display :${user##*:} appears to be already in use because of /tmp/.X11-unix/X${user##*:}"
++					eerror "Remove this file if there is no X server $HOSTNAME:${user##*:}"
++					return 1
++				elif [ -e "/tmp/.X${user##*:}-lock" ]; then
++					eerror "Display :${user##*:} appears to be already in use because of /tmp/.X${user##*:}-lock"
++					eerror "Remove this file if there is no X server $HOSTNAME:${user##*:}"
++					return 1
++				fi
++			done
++		fi
++		return 0
++	else
++		eerror 'Please define $DISPLAYS in /etc/conf.d/vnc'
++		return 1
++	fi
++}
++
++start() {
++	checkconfig start || return 1
++	ebegin "Starting TightVNC server"
++	for user in $DISPLAYS; do
++		su -s /bin/sh ${user%%:*} -c "cd ~${user%%:*} && vncserver :${user##*:} $VNC_OPTS" &>/dev/null
++	done
++	eend $?
++}
++
++stop() {
++	checkconfig stop || return 2
++	ebegin "Stopping TightVNC server"
++	for user in $DISPLAYS; do
++		su -s /bin/sh ${user%%:*} -c "vncserver -kill :${user##*:}" &>/dev/null
++	done
++	eend $?
++}
++
++restart() {
++        svc_stop
++        svc_start
++}
+diff --git a/net-misc/tightvnc/metadata.xml b/net-misc/tightvnc/metadata.xml
+new file mode 100644
+index 00000000..46809ce
+--- /dev/null
++++ b/net-misc/tightvnc/metadata.xml
+@@ -0,0 +1,11 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<!DOCTYPE pkgmetadata SYSTEM "http://www.gentoo.org/dtd/metadata.dtd">
++<pkgmetadata>
++  <!-- maintainer-needed -->
++  <use>
++    <flag name="server">Build TightVNC server</flag>
++  </use>
++  <upstream>
++    <remote-id type="sourceforge">vnc-tight</remote-id>
++  </upstream>
++</pkgmetadata>
+diff --git a/net-misc/tightvnc/tightvnc-1.3.10-r2.ebuild b/net-misc/tightvnc/tightvnc-1.3.10-r2.ebuild
+new file mode 100644
+index 00000000..18d3cc5
+--- /dev/null
++++ b/net-misc/tightvnc/tightvnc-1.3.10-r2.ebuild
+@@ -0,0 +1,130 @@
++# Copyright 1999-2014 Gentoo Foundation
++# Distributed under the terms of the GNU General Public License v2
++# $Id$
++
++EAPI="5"
++
++inherit eutils toolchain-funcs java-pkg-opt-2
++
++IUSE="java tcpd server"
++
++S="${WORKDIR}/vnc_unixsrc"
++DESCRIPTION="A great client/server software package allowing remote network access to graphical desktops"
++SRC_URI="mirror://sourceforge/vnc-tight/${P}_unixsrc.tar.bz2
++	java? ( mirror://sourceforge/vnc-tight/${P}_javasrc.tar.gz )"
++HOMEPAGE="http://www.tightvnc.com/"
++
++KEYWORDS="alpha amd64 arm ~mips ppc ~sh sparc x86 ~x86-fbsd ~arm-linux ~x86-linux"
++LICENSE="GPL-2"
++SLOT="0"
++
++CDEPEND="media-fonts/font-misc-misc
++	virtual/jpeg
++	server? (
++		media-fonts/font-cursor-misc
++		x11-apps/rgb
++		x11-apps/xauth
++		x11-apps/xsetroot
++	)
++	x11-libs/libX11
++	x11-libs/libXaw
++	x11-libs/libXmu
++	x11-libs/libXp
++	x11-libs/libXt
++	tcpd? ( >=sys-apps/tcp-wrappers-7.6-r2 )"
++RDEPEND="${CDEPEND}
++	java? ( >=virtual/jre-1.4 )"
++DEPEND="${CDEPEND}
++	java? ( >=virtual/jdk-1.4 )
++	x11-proto/xextproto
++	x11-proto/xproto
++	server? (
++		x11-proto/inputproto
++		x11-proto/kbproto
++		x11-proto/printproto
++	)
++	>=x11-misc/imake-1
++	x11-misc/gccmakedep
++	x11-misc/makedepend
++	!net-misc/tigervnc"
++
++pkg_setup() {
++	if ! use server;
++	then
++		echo
++		einfo "The 'server' USE flag will build tightvnc's server."
++		einfo "If '-server' is chosen only the client is built to save space."
++		einfo "Stop the build now if you need to add 'server' to USE flags.\n"
++	fi
++}
++
++src_prepare() {
++	epatch "${FILESDIR}/${PN}-1.3.10-pathfixes.patch" # fixes bug 78385 and 146099
++	epatch "${FILESDIR}/${PN}-1.3.8-imake-tmpdir.patch" # fixes bug 23483
++	epatch "${FILESDIR}/${PN}-1.3.8-darwin.patch" # fixes bug 89908
++	epatch "${FILESDIR}/${PN}-1.3.8-mips.patch"
++	epatch "${FILESDIR}"/server-CVE-2007-1003.patch
++	epatch "${FILESDIR}"/server-CVE-2007-1351-1352.patch
++	epatch "${FILESDIR}"/1.3.9-fbsd.patch
++	epatch "${FILESDIR}"/1.3.9-arm.patch
++	epatch "${FILESDIR}"/1.3.9-sh.patch
++	epatch "${FILESDIR}"/${PV}-sparc.patch
++	sed -e "s:\\(/etc/\\|/usr/share/\\):${EPREFIX}\\1:g" -i vncserver || die
++
++	if use java; then
++		cd "${WORKDIR}"
++		epatch "${FILESDIR}/${PN}-1.3.10-java-build.patch"
++	fi
++}
++
++src_compile() {
++	xmkmf -a || die "xmkmf failed"
++
++	emake -j1 CDEBUGFLAGS="${CFLAGS}" EXTRA_LDOPTIONS="${LDFLAGS}" World
++
++	if use server; then
++		cd Xvnc || die
++		econf
++
++		if use tcpd; then
++			local myextra="-lwrap"
++			emake -j1 EXTRA_LIBRARIES="${myextra}" \
++				CDEBUGFLAGS="${CFLAGS}" EXTRA_LDOPTIONS="${LDFLAGS}" \
++				EXTRA_DEFINES="-DUSE_LIBWRAP=1"
++		else
++			emake -j1 CDEBUGFLAGS="${CFLAGS}" EXTRA_LDOPTIONS="${LDFLAGS}"
++		fi
++	fi
++
++	if use java; then
++		cd "${WORKDIR}/vnc_javasrc" || die
++		emake -j1 JAVACFLAGS="$(java-pkg_javac-args)" all
++	fi
++
++}
++
++src_install() {
++	# the web based interface and the java viewer need the java class files
++	if use java; then
++		java-pkg_newjar "${WORKDIR}/vnc_javasrc/VncViewer.jar"
++		java-pkg_dolauncher "${PN}-java"
++		insinto /usr/share/${PN}/classes
++		doins "${WORKDIR}"/vnc_javasrc/*.vnc || die
++		dosym /usr/share/${PN}/lib/${PN}.jar /usr/share/${PN}/classes/VncViewer.jar
++	fi
++
++	dodir /usr/share/man/man1 /usr/bin
++	./vncinstall "${ED}"/usr/bin "${ED}"/usr/share/man || die "vncinstall failed"
++
++	if use server; then
++		newconfd "${FILESDIR}"/tightvnc.confd vnc
++		newinitd "${FILESDIR}"/tightvnc.initd vnc
++	else
++		rm -f "${ED}"/usr/bin/vncserver || die
++		rm -f "${ED}"/usr/share/man/man1/{Xvnc,vncserver}* || die
++	fi
++
++	dodoc ChangeLog README WhatsNew
++	use java && dodoc "${FILESDIR}"/README.JavaViewer
++	newdoc vncviewer/README README.vncviewer
++}
+diff --git a/net-misc/tightvnc/tightvnc-1.3.10-r3.ebuild b/net-misc/tightvnc/tightvnc-1.3.10-r3.ebuild
+new file mode 100644
+index 00000000..44acf8f
+--- /dev/null
++++ b/net-misc/tightvnc/tightvnc-1.3.10-r3.ebuild
+@@ -0,0 +1,133 @@
++# Copyright 1999-2016 Gentoo Foundation
++# Distributed under the terms of the GNU General Public License v2
++# $Id$
++
++EAPI="5"
++
++inherit eutils toolchain-funcs java-pkg-opt-2
++
++IUSE="java tcpd server"
++
++S="${WORKDIR}/vnc_unixsrc"
++DESCRIPTION="A great client/server software package allowing remote network access to graphical desktops"
++SRC_URI="mirror://sourceforge/vnc-tight/${P}_unixsrc.tar.bz2
++	java? ( mirror://sourceforge/vnc-tight/${P}_javasrc.tar.gz )"
++HOMEPAGE="http://www.tightvnc.com/"
++
++KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~mips ~ppc ~sh ~sparc ~x86 ~x86-fbsd ~arm-linux ~x86-linux"
++LICENSE="GPL-2"
++SLOT="0"
++
++CDEPEND="media-fonts/font-misc-misc
++	virtual/jpeg
++	server? (
++		media-fonts/font-cursor-misc
++		x11-apps/rgb
++		x11-apps/xauth
++		x11-apps/xsetroot
++	)
++	x11-libs/libX11
++	x11-libs/libXaw
++	x11-libs/libXmu
++	x11-libs/libXp
++	x11-libs/libXt
++	tcpd? ( >=sys-apps/tcp-wrappers-7.6-r2 )"
++RDEPEND="${CDEPEND}
++	java? ( >=virtual/jre-1.4 )"
++DEPEND="${CDEPEND}
++	java? ( >=virtual/jdk-1.4 )
++	x11-proto/xextproto
++	x11-proto/xproto
++	server? (
++		x11-proto/inputproto
++		x11-proto/kbproto
++		x11-proto/printproto
++	)
++	>=x11-misc/imake-1
++	x11-misc/gccmakedep
++	x11-misc/makedepend
++	!net-misc/tigervnc"
++
++pkg_setup() {
++	if ! use server;
++	then
++		echo
++		einfo "The 'server' USE flag will build tightvnc's server."
++		einfo "If '-server' is chosen only the client is built to save space."
++		einfo "Stop the build now if you need to add 'server' to USE flags.\n"
++	fi
++}
++
++src_prepare() {
++	epatch "${FILESDIR}/${PN}-1.3.10-pathfixes.patch" # fixes bug 78385 and 146099
++	epatch "${FILESDIR}/${PN}-1.3.8-imake-tmpdir.patch" # fixes bug 23483
++	epatch "${FILESDIR}/${PN}-1.3.8-darwin.patch" # fixes bug 89908
++	epatch "${FILESDIR}/${PN}-1.3.8-mips.patch"
++	epatch "${FILESDIR}"/server-CVE-2007-1003.patch
++	epatch "${FILESDIR}"/server-CVE-2007-1351-1352.patch
++	epatch "${FILESDIR}"/1.3.9-fbsd.patch
++	epatch "${FILESDIR}"/1.3.9-arm.patch
++	epatch "${FILESDIR}"/1.3.9-sh.patch
++	epatch "${FILESDIR}"/${P}-ppc64el-support.patch
++	epatch "${FILESDIR}"/${P}-aarch64.patch
++	epatch "${FILESDIR}"/${P}-more-arm64-fixes.patch
++
++	sed -e "s:\\(/etc/\\|/usr/share/\\):${EPREFIX}\\1:g" -i vncserver || die
++
++	if use java; then
++		cd "${WORKDIR}"
++		epatch "${FILESDIR}/${PN}-1.3.10-java-build.patch"
++	fi
++}
++
++src_compile() {
++	xmkmf -a || die "xmkmf failed"
++
++	emake -j1 CDEBUGFLAGS="${CFLAGS}" EXTRA_LDOPTIONS="${LDFLAGS}" World
++
++	if use server; then
++		cd Xvnc || die
++		econf
++
++		if use tcpd; then
++			local myextra="-lwrap"
++			emake -j1 EXTRA_LIBRARIES="${myextra}" \
++				CDEBUGFLAGS="${CFLAGS}" EXTRA_LDOPTIONS="${LDFLAGS}" \
++				EXTRA_DEFINES="-DUSE_LIBWRAP=1"
++		else
++			emake -j1 CDEBUGFLAGS="${CFLAGS}" EXTRA_LDOPTIONS="${LDFLAGS}"
++		fi
++	fi
++
++	if use java; then
++		cd "${WORKDIR}/vnc_javasrc" || die
++		emake -j1 JAVACFLAGS="$(java-pkg_javac-args)" all
++	fi
++
++}
++
++src_install() {
++	# the web based interface and the java viewer need the java class files
++	if use java; then
++		java-pkg_newjar "${WORKDIR}/vnc_javasrc/VncViewer.jar"
++		java-pkg_dolauncher "${PN}-java"
++		insinto /usr/share/${PN}/classes
++		doins "${WORKDIR}"/vnc_javasrc/*.vnc || die
++		dosym /usr/share/${PN}/lib/${PN}.jar /usr/share/${PN}/classes/VncViewer.jar
++	fi
++
++	dodir /usr/share/man/man1 /usr/bin
++	./vncinstall "${ED}"/usr/bin "${ED}"/usr/share/man || die "vncinstall failed"
++
++	if use server; then
++		newconfd "${FILESDIR}"/tightvnc.confd vnc
++		newinitd "${FILESDIR}"/tightvnc.initd vnc
++	else
++		rm -f "${ED}"/usr/bin/vncserver || die
++		rm -f "${ED}"/usr/share/man/man1/{Xvnc,vncserver}* || die
++	fi
++
++	dodoc ChangeLog README WhatsNew
++	use java && dodoc "${FILESDIR}"/README.JavaViewer
++	newdoc vncviewer/README README.vncviewer
++}

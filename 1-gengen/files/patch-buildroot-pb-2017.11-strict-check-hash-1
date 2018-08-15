@@ -1,0 +1,76 @@
+diff --git a/support/download/check-hash b/support/download/check-hash
+index fe9c105..dd248e0 100755
+--- a/support/download/check-hash
++++ b/support/download/check-hash
+@@ -11,13 +11,15 @@ set -e
+ #       in the .hash file
+ #
+ # Exit codes:
+-#   0:  the hash file exists and the file to check matches all its hashes,
+-#       or the hash file does not exist
++#   0:  the hash file exists and the file to check matches all its hashes
++#   5:  the hash file does not exist
+ #   1:  unknown command-line option
+ #   2:  the hash file exists and the file to check does not match at least
+ #       one of its hashes
+ #   3:  the hash file exists and there was no hash to check the file against
+ #   4:  the hash file exists and at least one hash type is unknown
++#   6:  "File explicitly has no hash"
++#   7:  no strong hash
+ 
+ while getopts :q OPT; do
+     case "${OPT}" in
+@@ -31,16 +33,14 @@ h_file="${1}"
+ file="${2}"
+ base="${3}"
+ 
+-# Bail early if no hash to check
+-if [ -z "${h_file}" ]; then
+-    exit 0
+-fi
+ # Does the hash-file exist?
+ if [ ! -f "${h_file}" ]; then
+-    printf "WARNING: no hash file for %s\n" "${base}" >&2
+-    exit 0
++    # go on with an empty file so the proper hash will be printed
++    touch "${h_file}"
+ fi
+ 
++at_least_one_strong_hash=n
++
+ # Check one hash for a file
+ # $1: algo hash
+ # $2: known hash
+@@ -59,7 +59,8 @@ check_one_hash() {
+             return 0
+             ;;
+         md5|sha1)                       ;;
+-        sha224|sha256|sha384|sha512)    ;;
++        sha224)                         ;;
++        sha256|sha384|sha512) at_least_one_strong_hash=y ;;
+         *) # Unknown hash, exit with error
+             printf "ERROR: unknown hash '%s' for '%s'\n"  \
+                    "${_h}" "${base}" >&2
+@@ -99,11 +100,21 @@ while read t h f; do
+     esac
+ done <"${h_file}"
+ 
++if [ "$at_least_one_strong_hash" != "y" ]
++then
++  SHASUM="$(sha256sum "$file" | cut -d " " -f 1)"
++  echo "!! no strong hash for '${base}'" >&2
++  echo "!! you must add the following to '${h_file}'" >&2
++  echo "!! (and preferably undertake other actions to verify the authenticity of this package)" >&2
++  echo sha256 "$SHASUM" "$base" >&2
++  exit 7
++fi
++
+ if [ ${nb_checks} -eq 0 ]; then
+     case " ${BR_NO_CHECK_HASH_FOR} " in
+     *" ${base} "*)
+         # File explicitly has no hash
+-        exit 0
++        exit 6
+         ;;
+     esac
+     printf "ERROR: No hash found for %s\n" "${base}" >&2

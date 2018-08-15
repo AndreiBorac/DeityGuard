@@ -1,0 +1,118 @@
+#!/usr/bin/env bash
+
+set -o xtrace
+set -o errexit
+set -o nounset
+set -o pipefail
+shopt -s failglob
+shopt -s nullglob
+
+if [ "$(id -u)" != "0" ]
+then
+  echo "fatal: must be run as root"
+  exit 1
+fi
+
+if ! egrep -q '^ID=gentoo$' /etc/os-release
+then
+  echo "fatal: must be running gentoo"
+  exit 1
+fi
+
+if [ -f /tmp/dg/did-zfsbegin ]
+then
+  echo "already ran to completion"
+  exit
+fi
+
+if [ ! -e /tmp/dg/initramfs/classical-lander-cache-partition-drive ] || [ ! -f /tmp/dg/initramfs/classical-lander-cache-partition-index ] || [ ! -e /tmp/dg/initramfs/classical-lander-cache-partition ] || [ ! -f /tmp/dg/initramfs/classical-lander-cache-partition-rsrvz ]
+then
+  echo "fatal: cannot locate cache partition"
+  exit 1
+fi
+
+INF_INDEX="$(cat /tmp/dg/initramfs/classical-lander-cache-partition-index)"
+INF_RSRVZ="$(cat /tmp/dg/initramfs/classical-lander-cache-partition-rsrvz)"
+
+if ! sgdisk /tmp/dg/initramfs/classical-lander-cache-partition-drive -i "$INF_INDEX" | egrep '^Partition GUID code: AE8F2F3E-2A46-413D-B55A-D6CECCEE28DA'
+then
+  echo "fatal: unexpected GUID code"
+  exit 1
+fi
+
+LMUR=/lib/modules/"$(uname -r)"
+
+. "$LMUR"/special_zfs/version
+
+ZOLDIR=/tmp/zol_fH79tnJ9
+
+mkdir -p "$ZOLDIR"
+cd       "$ZOLDIR"
+
+dd if=/tmp/dg/initramfs/classical-lander-cache-partition of=./ko.tar skip="$(( (INF_RSRVZ-TAR_KO_SIZ) ))" count="$TAR_KO_SIZ" iflag=skip_bytes,count_bytes oflag=seek_bytes
+
+function finally()
+{
+  sudo modprobe zlib
+  sudo insmod ./spl/module/spl/spl.ko
+  sudo insmod ./spl/module/splat/splat.ko
+  sudo insmod ./zfs/module/avl/zavl.ko
+  sudo insmod ./zfs/module/icp/icp.ko
+  sudo insmod ./zfs/module/nvpair/znvpair.ko
+  sudo insmod ./zfs/module/unicode/zunicode.ko
+  sudo insmod ./zfs/module/zcommon/zcommon.ko
+  sudo insmod ./zfs/module/zfs/zfs.ko
+  #sudo insmod ./zfs/module/zpios/zpios.ko
+  
+  touch /tmp/dg/did-zfsbegin
+  
+  exit 0
+}
+
+if [ "$(sha256sum "$ZOLDIR"/ko.tar | cut -d " " -f 1)" == "$TAR_KO_SHA" ]
+then
+  tar -xf ko.tar
+  
+  finally
+fi
+
+LINUX_SOURCE_PATH="$LMUR"/special_zfs/headers
+
+mkdir ./spl
+(
+  cd ./spl
+  tar --strip-components=1 -xf "$LMUR"/special_zfs/spl.tar
+  sh autogen.sh
+  ./configure --with-linux="$LINUX_SOURCE_PATH"
+  make -j"$(nproc)"
+)
+SPL_SOURCE_PATH="$(readlink -f ./spl)"
+
+mkdir ./zfs
+(
+  cd ./zfs
+  tar --strip-components=1 -xf "$LMUR"/special_zfs/zfs.tar
+  sh autogen.sh
+  ./configure --with-config=kernel --with-linux="$LINUX_SOURCE_PATH" --with-spl="$SPL_SOURCE_PATH"
+  make -j"$(nproc)"
+)
+
+function tar_ko()
+{
+  find . -type f | ( egrep -i '\.ko$' || true ) | LC_ALL=C sort | tar --files-from - --mtime='1999-01-01 00:00:00Z' --create
+}
+
+tar_ko >./ko.tar
+
+NEW_TAR_KO_SIZ="$(tar_ko | wc -c)"
+NEW_TAR_KO_SHA="$(tar_ko | sha256sum - | cut -d " " -f 1)"
+
+if [ "$NEW_TAR_KO_SHA" != "$TAR_KO_SHA" ]
+then
+  echo "fatal: compilation product does not match expected"
+  exit 1
+fi
+
+dd if=./ko.tar of=/tmp/dg/initramfs/classical-lander-cache-partition seek="$(( (INF_RSRVZ-TAR_KO_SIZ) ))" count="$TAR_KO_SIZ" iflag=skip_bytes,count_bytes oflag=seek_bytes
+
+finally

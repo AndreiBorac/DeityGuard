@@ -1,0 +1,33 @@
+Protocol 2
+
+HostKeyAlgorithms ssh-ed25519
+PubkeyAcceptedKeyTypes ssh-ed25519
+KexAlgorithms diffie-hellman-group-exchange-sha256
+MACs hmac-sha2-256
+Ciphers aes256-ctr
+
+HostKey /etc/ssh/ssh_host_ed25519_key
+
+AuthenticationMethods publickey
+PubkeyAuthentication yes
+ChallengeResponseAuthentication no
+GSSAPIAuthentication no
+HostbasedAuthentication no
+KbdInteractiveAuthentication no
+KerberosAuthentication no
+PasswordAuthentication no
+RhostsRSAAuthentication no
+RSAAuthentication no
+
+UsePrivilegeSeparation yes
+StrictModes yes
+
+AllowUsers root user
+PermitRootLogin yes
+
+UseDNS no
+UsePAM no
+X11Forwarding yes
+X11UseLocalhost yes
+
+Subsystem sftp /usr/lib/misc/sftp-server

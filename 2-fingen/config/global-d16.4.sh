@@ -1,0 +1,35 @@
+MACHINE_NAME=global_d16
+
+FINHUB_VARSET=global
+
+#include model-d16.4
+#include fetch-global
+
+FANMAN_CELSIUS_LO=40000
+FANMAN_CELSIUS_HI=65000
+
+FANMAN_PWM_IDLE=100
+FANMAN_PWM_FULL=200
+
+function f_defs()
+{
+  ROOTSHADOW='*'
+  TZDATA_TZ=GMT
+  PKEY_COMMON=
+  PKEY_ROOT="$PKEY_COMMON"
+  PKEY_USER="$PKEY_COMMON"
+}
+
+#include x64-common
+
+MANAGE_SSH_HOST_KEY=n
+
+# be conservative
+FLASHPAGAN_STRATEGY=conv
+FLASHPAGAN_SPI_SPEED_HZ=5000000
+
+if [ "$DEBUG_MODEL" == "y" ]
+then
+  LINUX_CMDLINE="console=ttyS0,115200n8"
+  SERIAL_CONSOLE=y
+fi

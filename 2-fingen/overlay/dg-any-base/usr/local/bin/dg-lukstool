@@ -1,0 +1,356 @@
+#!/usr/bin/env bash
+
+set -o xtrace
+set -o errexit
+set -o nounset
+set -o pipefail
+shopt -s failglob
+shopt -s nullglob
+
+ARG1="${1-}"
+ARG2="${2-}"
+
+function shell_adjust()
+{
+  [ -z "${SHELL_RESUME_TO+x}" ] # nesting not supported
+  set +o xtrace
+  SHELL_RESUME_TO="$(set +o ; shopt -p)"
+  "$@"
+  set -o xtrace
+}
+
+function shell_resume()
+{
+  set +o xtrace
+  eval "$SHELL_RESUME_TO"
+  set -o xtrace
+  unset SHELL_RESUME_TO
+  set -o errexit
+}
+
+function dirty_glob()
+{
+  shell_adjust shopt -u failglob nullglob
+  local X=$(eval "echo $1")
+  echo "${X[@]}"
+  shell_resume
+}
+
+function dirty_glob_all_drives()
+{
+  dirty_glob "/dev/{hd,sr,sd,vd}*"
+}
+
+function set_all_drives()
+{
+  ALL_DRIVES=()
+  HAVE_DRIVES=n
+  local ALL_DRIVES_GLOBTURE="$(dirty_glob_all_drives)"
+  shell_adjust set -o noglob
+  local i
+  for i in $ALL_DRIVES_GLOBTURE
+  do
+    if [ -b "$i" ]
+    then
+      ALL_DRIVES+=("$i")
+      HAVE_DRIVES=y
+    fi
+  done
+  shell_resume
+}
+
+function waitdev()
+{
+  while [ ! -b "$1" ]
+  do
+    echo "waiting for: \"$1\""
+    sleep 1
+  done
+}
+
+if [ "$ARG1" == "-h" ] || [ "$ARG1" == "help" ]
+then
+  echo "usage:"
+  echo "  dg-lukstool help"
+  echo "  dg-lukstool format (device)"
+  echo "  dg-lukstool teardown"
+  echo "  dg-lukstool teardown-unused"
+  exit
+fi
+
+OPTS_LUKS_FORMAT="--hash sha512 --cipher aes-xts-plain64 --key-size 512 --use-urandom"
+
+if [ "$ARG1" == "format" ]
+then
+  [ -b "$ARG2" ] || { echo "fatal: not a block device: '$ARG2'"; exit 1; }
+  
+  sudo cryptsetup luksFormat $OPTS_LUKS_FORMAT "$ARG2"
+  
+  exit
+fi
+
+if [ "$ARG1" == "teardown" ]
+then
+  shell_adjust shopt -u failglob
+  
+  for i in /dev/mapper/swap-uuid-*
+  do
+    sudo swapoff "$i" || true
+    sudo cryptsetup remove "$i" || true
+  done
+  
+  for j in {1..10}
+  do
+    for i in /dev/mapper/luks-uuid-*
+    do
+      sudo umount "$i" || true
+      sudo cryptsetup remove "$i" || true
+      sudo dmsetup remove "$i" || true
+    done
+  done
+  
+  exit
+fi
+
+if [ "$ARG1" == "teardown-unused" ]
+then
+  shell_adjust shopt -u failglob
+  
+  for i in /dev/mapper/luks-uuid-*
+  do
+    sudo cryptsetup remove "$i" || true
+  done
+  
+  exit
+fi
+
+function scandev_()
+{
+  LUKSDEVS=""
+  
+  set_all_drives
+  
+  if [ "$HAVE_DRIVES" == "y" ]
+  then
+    for i in "${ALL_DRIVES[@]}"
+    do
+      if [ -b "$i" ]
+      then
+        if sudo cryptsetup isLuks "$i"
+        then
+          LUKSDEVS="$LUKSDEVS $i"
+        fi
+      fi
+    done
+  fi
+}
+
+function cryptsetup_()
+{
+  ( ( set +o xtrace ; echo -n "$PW" ) || true ) | sudo cryptsetup --key-file - luksOpen "$1" "$2"
+}
+
+function prompt_()
+{
+  shell_adjust
+  set +o xtrace
+  echo "$1" | fmt
+  IFS= read -p "> "
+  shell_resume
+}
+
+NAMESAKE="dg_lukstool"
+
+scandev_
+
+while [ 1 ]
+do
+  set +o xtrace
+  read -s -p "enter passphrase: " PW
+  echo
+  if [ "$PW" == "done" ]
+  then
+    set -o xtrace
+    break
+  fi
+  set -o xtrace
+  
+  for i in $LUKSDEVS
+  do
+    BASE_UUID="$(sudo cryptsetup luksUUID "$i")"
+    LUKS_UUID=luks-uuid-"$BASE_UUID"
+    
+    rm -f /tmp/."$NAMESAKE"-opened
+    
+    if [ ! -b /dev/mapper/"$LUKS_UUID" ]
+    then
+      if cryptsetup_ "$i" "$LUKS_UUID"
+      then
+        touch /tmp/."$NAMESAKE"-opened
+      else
+        RETV="$?"
+        
+        if [ "$RETV" == "5" ]
+        then
+          prompt_ "Device appears in use. Type YES in all capitals to bypass, or anything else to skip. Please only use bypass if you know what you are doing."
+          if [ "$REPLY" == "YES" ]
+          then
+            EDEV=/dev/mapper/echo-uuid-"$LUKS_UUID"
+            
+            if [ ! -b "$EDEV" ]
+            then
+              BSIZ="$(sudo blockdev --getsize64 "$i")"
+              
+              if sudo dmsetup create echo-uuid-"$LUKS_UUID" --table "0 $(( (BSIZ/512) )) linear ${i} 0"
+              then
+                waitdev "$EDEV"
+              fi
+            fi
+            
+            if [ -b "$EDEV" ]
+            then
+              if cryptsetup_ "$EDEV" "$LUKS_UUID"
+              then
+                touch /tmp/."$NAMESAKE"-opened
+              fi
+            fi
+          fi
+        fi
+      fi
+      
+      if [ -f /tmp/."$NAMESAKE"-opened ]
+      then
+        DEV=/dev/mapper/"$LUKS_UUID"
+        waitdev "$DEV"
+        
+        FSTYPE="unknown"
+        CMD_CHECK="fsck.unknown"
+        function has_type() { sudo blkid -o export | egrep -q '^TYPE='"$1"'$' ;}
+        if   has_type ext4
+        then
+          FSTYPE="ext4"
+          CMD_CHECK="e2fsck"
+        elif has_type btrfs
+        then
+          FSTYPE="btrfs"
+          CMD_CHECK="btrfs check --repair"
+        fi
+        
+        JUST_DID_FORMAT="n"
+        
+        if [ "$FSTYPE" == "unknown" ]
+        then
+          prompt_ "Could not detect filesystem type. Type EXT4 or BTRFS in all capitals to format, or anything else to skip."
+          
+          if   [ "$REPLY" == "EXT4" ]
+          then
+            sudo mkfs.ext4 "$DEV"
+            FSTYPE="ext4"
+          elif [ "$REPLY" == "BTRFS" ]
+          then
+            sudo mkfs.btrfs "$DEV"
+            FSTYPE="btrfs"
+          else
+            continue
+          fi
+          
+          JUST_DID_FORMAT="y"
+        else
+          if   ! sudo $CMD_CHECK "$DEV"
+          then
+            if ! sudo $CMD_CHECK "$DEV"
+            then
+              echo "filesystem check failed twice, skipping"
+              continue
+            fi
+          fi
+        fi
+        
+        MP=/mnt/"$LUKS_UUID"
+        sudo mkdir -p "$MP"
+        if ! sudo mount -t "$FSTYPE" -o noatime,nodiratime "$DEV" "$MP"
+        then
+          echo "failed to mount, skipping"
+          continue
+        fi
+        sudo mkdir -p "$MP"/."$NAMESAKE"
+        
+        MP_OLD="$MP"
+        if [ -f "$MP"/."$NAMESAKE"/where ]
+        then
+          MP="$(cat "$MP"/."$NAMESAKE"/where)"
+        else
+          prompt_ "Could not find WHERE file. Please enter the path to mount to, or leave the entry blank to keep the filesystem mounted at $MP."
+          MP="$REPLY"
+        fi
+        if [ "$MP" != "" ]
+        then
+          sudo mkdir -p "$MP"
+          sudo mount --move "$MP_OLD" "$MP"
+          if [ "$JUST_DID_FORMAT" == "y" ] && [ ! -f "$MP"/."$NAMESAKE"/where ]
+          then
+            prompt_ "Type YES in all capitals to save mountpoint in WHERE file, or anything else to skip. Mountpoint is '$MP'."
+            if [ "$REPLY" == "YES" ]
+            then
+              echo "$MP" | sudo tee "$MP"/."$NAMESAKE"/where
+            fi
+          fi
+        else
+          MP="$MP_OLD"
+        fi
+        
+        if [ "$FSTYPE" != "btrfs" ]
+        then
+          SWAPFILE="$MP"/."$NAMESAKE"/swap
+          if [ "$JUST_DID_FORMAT" == "y" ] && [ ! -f "$SWAPFILE" ]
+          then
+            prompt_ "Type YES in all capitals to create a swap file on this partition, or anything else to skip this step. Mountpoint is '$MP'."
+            if [ "$REPLY" == "YES" ]
+            then
+              prompt_ "Please enter the size, in gigabytes, to make the swap file."
+              if [[ "$REPLY" =~ ^[0-9]+$ ]] && ((0 < REPLY)) && ((REPLY < 1000000))
+              then
+                (
+                  SWAPFILETEMP="$(sudo mktemp "$SWAPFILE".XXX)"
+                  sudo mv "$SWAPFILETEMP" "$SWAPFILE"
+                  sudo chmod 0000 "$SWAPFILE"
+                  sudo dd if=/dev/zero of="$SWAPFILE" bs=16M count=$(( (REPLY*1024/16) ))
+                )
+              else
+                prompt_ "Invalid size specification. Moving on."
+              fi
+            fi
+          fi
+          if [ -f "$SWAPFILE" ]
+          then
+            prompt_ "Type YES in all capitals to enable use of the swap file on this partition. Mountpoint is '$MP'."
+            if [ "$REPLY" == "YES" ]
+            then
+              (
+                RE='^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}--[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+                shell_adjust
+                set +o xtrace
+                THEKEYA="$(cat /proc/sys/kernel/random/uuid)"
+                THEKEYB="$(cat /proc/sys/kernel/random/uuid)"
+                THEKEY="$THEKEYA"--"$THEKEYB"
+                [[ $THEKEY =~ $RE ]]
+                shell_resume
+                sudo modprobe loop
+                ( set +o xtrace ; echo -n "$THEKEY" ) | sudo cryptsetup luksFormat $OPTS_LUKS_FORMAT --key-file - "$SWAPFILE"
+                ( set +o xtrace ; echo -n "$THEKEY" ) | sudo cryptsetup luksOpen                     --key-file - "$SWAPFILE" swap-uuid-"$BASE_UUID"
+                waitdev     /dev/mapper/swap-uuid-"$BASE_UUID"
+                sudo mkswap /dev/mapper/swap-uuid-"$BASE_UUID"
+                sudo swapon /dev/mapper/swap-uuid-"$BASE_UUID"
+              )
+            fi
+          fi
+        fi
+        
+        if [ -f "$MP"/."$NAMESAKE"/script ]
+        then
+          ( bash "$MP"/."$NAMESAKE"/script </dev/null 2>&1 | tee "$MP"/."$NAMESAKE"/stdamp-script ) || true
+        fi
+      fi
+    fi
+  done
+done

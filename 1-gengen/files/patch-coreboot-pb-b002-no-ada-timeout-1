@@ -1,0 +1,13 @@
+diff --git a/util/crossgcc/buildgcc b/util/crossgcc/buildgcc
+index cf152a1..78d7ff4 100755
+--- a/util/crossgcc/buildgcc
++++ b/util/crossgcc/buildgcc
+@@ -1151,7 +1151,7 @@ if [ -z "${LANGUAGES}" ]; then
+ 
+ 		printf "on Ubuntu 16.04, if \`gcc\` is \`gcc-5\`:\n"
+ 		printf "    apt-get install gnat-5 && make crossgcc\n"
+-		timeout 30
++		#timeout 30
+ 		LANGUAGES="${DEFAULT_LANGUAGES}"
+ 	fi
+ fi

@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+
+#set -o xtrace # stay silent since sgdisk output might be parsed by scripts
+set -o errexit
+set -o nounset
+set -o pipefail
+shopt -s failglob
+shopt -s nullglob
+
+. /tmp/dg/contingency/emmc_lw/common.sh
+
+if (( "$#" < 1 ))
+then
+  # pass through
+  exec sgdisk "$@"
+fi
+
+lastarg="${@: -1}"
+
+check_is_mmcblk0 "$lastarg"
+
+if [ "$is_mmcblk0" != "y" ]
+then
+  # pass through
+  exec sgdisk "$@"
+fi
+
+check_wr_mmcblk0
+
+gpt_model_rd /dev/mmcblk0
+
+/usr/sbin/sgdisk "${@:1:$(($#-1))}" "$tmp_model"
+
+accurate_nt_ "$tmp_model" "$tmp_model_trk"
+if [ "$accurate_nt_result" == "y" ]
+then
+  gpt_model_wb /dev/mmcblk0
+else
+  gpt_model_wb /dev/null
+fi
+
+#echo "+OK (sgdisk (wrapper))" # stay silent since sgdisk output might be parsed by scripts

@@ -1,0 +1,489 @@
+diff --git a/package/Config.in b/package/Config.in
+index fe5ccc4..7a5468e 100644
+--- a/package/Config.in
++++ b/package/Config.in
+@@ -1967,3 +1967,15 @@ menu "Text editors and viewers"
+ endmenu
+ 
+ endmenu
++
++menu "Extra packages"
++	source "package/tint2/Config.in"
++	source "package/libmpsse/Config.in"
++	source "package/flashpagan/Config.in"
++	source "package/xboard/Config.in"
++	source "package/xbindkeys/Config.in"
++	source "package/cbfstool/Config.in"
++	source "package/lunzip/Config.in"
++	source "package/libvte/Config.in"
++	source "package/lxterminal/Config.in"
++endmenu
+diff --git a/package/cbfstool/Config.in b/package/cbfstool/Config.in
+new file mode 100644
+index 0000000..8309b8e
+--- /dev/null
++++ b/package/cbfstool/Config.in
+@@ -0,0 +1,6 @@
++config BR2_PACKAGE_CBFSTOOL
++	bool "cbfstool"
++	help
++	  cbfstool is a "CLI utility for CBFS file manipulation"
++
++	  https://github.com/coreboot/coreboot
+diff --git a/package/cbfstool/cbfstool.hash b/package/cbfstool/cbfstool.hash
+new file mode 100644
+index 0000000..4f79b7f
+--- /dev/null
++++ b/package/cbfstool/cbfstool.hash
+@@ -0,0 +1,2 @@
++sha256 ae5533a0783c0c7d7c6b278efd05dde6c9d2ce9f50fedaefdbb24e879bcd284f cbfstool-4.6.tar.gz
++sha256 98287cc2b4f2c0b31cd09e1624938654d591c5adffbbf476164c41796c98e7de a1c5f7c006b7bb3d5894f132f70ba3bbadfd9d6b.tar.gz
+diff --git a/package/cbfstool/cbfstool.mk b/package/cbfstool/cbfstool.mk
+new file mode 100644
+index 0000000..e263402
+--- /dev/null
++++ b/package/cbfstool/cbfstool.mk
+@@ -0,0 +1,18 @@
++CBFSTOOL_VERSION = 4.6
++CBFSTOOL_SITE = $(call github,coreboot,coreboot,$(CBFSTOOL_VERSION))
++CBFSTOOL_EXTRA_DOWNLOADS_VBOOT_REVISION = a1c5f7c006b7bb3d5894f132f70ba3bbadfd9d6b
++CBFSTOOL_EXTRA_DOWNLOADS = $(call github,coreboot,vboot,$(CBFSTOOL_EXTRA_DOWNLOADS_VBOOT_REVISION)).tar.gz
++CBFSTOOL_DEPENDENCIES = host-pkgconf
++
++define CBFSTOOL_BUILD_CMDS
++	tar -C $(@D)/3rdparty/vboot -xf $(DL_DIR)/$(CBFSTOOL_EXTRA_DOWNLOADS_VBOOT_REVISION).tar.gz --strip-components=1
++	sed -i -e 's/^\.SILENT:$$//' $(@D)/util/cbfstool/Makefile
++	sed -i -e 's/^#include <stdio.h>$$/#pragma push_macro("__unused")\n#undef __unused\n#include <stdio.h> \/\/\n#pragma pop_macro("__unused")/' $(@D)/util/cbfstool/console/console.h
++	env -u HOSTCC $(TARGET_MAKE_ENV) $(MAKE) -j1 V=1 CC="$(TARGET_CC)" PREFIX=/usr EXTRA_CFLAGS="$(TARGET_CFLAGS)" LDFLAGS="$(TARGET_LDFLAGS)" -C $(@D)/util/cbfstool/
++endef
++
++define CBFSTOOL_INSTALL_TARGET_CMDS
++	$(INSTALL) -D -m 0755 $(@D)/util/cbfstool/cbfstool $(TARGET_DIR)/usr/bin/cbfstool
++endef
++
++$(eval $(generic-package))
+diff --git a/package/flashpagan/Config.in b/package/flashpagan/Config.in
+new file mode 100644
+index 0000000..6ec8d73
+--- /dev/null
++++ b/package/flashpagan/Config.in
+@@ -0,0 +1,6 @@
++config BR2_PACKAGE_FLASHPAGAN
++	bool "flashpagan"
++	select BR2_PACKAGE_LIBMPSSE
++	help
++
++	flashpagan is an application for flashing BIOS chips using FTDI USB adapters. it requires libmpsse.
+diff --git a/package/flashpagan/flashpagan.mk b/package/flashpagan/flashpagan.mk
+new file mode 100644
+index 0000000..fec3229
+--- /dev/null
++++ b/package/flashpagan/flashpagan.mk
+@@ -0,0 +1,20 @@
++################################################################################
++#
++# flashpagan
++#
++################################################################################
++
++FLASHPAGAN_VERSION = 001
++FLASHPAGAN_SITE = $(TOPDIR)/../localsources/flashpagan
++FLASHPAGAN_SITE_METHOD = local
++FLASHPAGAN_DEPENDENCIES = host-pkgconf libmpsse
++
++define FLASHPAGAN_BUILD_CMDS
++	cd $(@D) && $(TARGET_CC) -W{all,extra,c++-compat,{,float-}conversion} -DLIBFTDI1=1 -Os -o ./flashpagan ./flashpagan.c -lmpsse
++endef
++
++define FLASHPAGAN_INSTALL_TARGET_CMDS
++	$(INSTALL) -D -m 0755 $(@D)/flashpagan $(TARGET_DIR)/usr/bin
++endef
++
++$(eval $(generic-package))
+diff --git a/package/libmpsse/Config.in b/package/libmpsse/Config.in
+new file mode 100644
+index 0000000..65d2071
+--- /dev/null
++++ b/package/libmpsse/Config.in
+@@ -0,0 +1,8 @@
++config BR2_PACKAGE_LIBMPSSE
++	bool "libmpsse"
++	select BR2_PACKAGE_LIBFTDI1
++	help
++
++	libmpsse is an "Open source library for SPI/I2C control via FTDI chips"
++
++	https://github.com/devttys0/libmpsse
+diff --git a/package/libmpsse/libmpsse.hash b/package/libmpsse/libmpsse.hash
+new file mode 100644
+index 0000000..412ebc0
+--- /dev/null
++++ b/package/libmpsse/libmpsse.hash
+@@ -0,0 +1,2 @@
++# locally calculated
++sha256 3427da227d1c733912e6766ea86d442b8f93c9226184cc40b62e4f409acf235e libmpsse-for-buildroot-2017.11.tar.gz
+diff --git a/package/libmpsse/libmpsse.mk b/package/libmpsse/libmpsse.mk
+new file mode 100644
+index 0000000..bf47ac4
+--- /dev/null
++++ b/package/libmpsse/libmpsse.mk
+@@ -0,0 +1,15 @@
++################################################################################
++#
++# libmpsse
++#
++################################################################################
++
++LIBMPSSE_VERSION = for-buildroot-2017.11
++LIBMPSSE_SOURCE = libmpsse-$(LIBMPSSE_VERSION).tar.gz
++LIBMPSSE_SITE = https://github.com/AndreiBoracMirrors/libmpsse/archive
++LIBMPSSE_SUBDIR = src
++LIBMPSSE_INSTALL_STAGING = YES
++LIBMPSSE_DEPENDENCIES = host-pkgconf libftdi1
++LIBMPSSE_CONF_OPTS = --disable-python
++
++$(eval $(autotools-package))
+diff --git a/package/libvte/Config.in b/package/libvte/Config.in
+new file mode 100644
+index 0000000..0d85c32
+--- /dev/null
++++ b/package/libvte/Config.in
+@@ -0,0 +1,15 @@
++config BR2_PACKAGE_LIBVTE
++	bool "libvte"
++	depends on BR2_PACKAGE_XORG7
++	select BR2_PACKAGE_LIBX11
++	select BR2_PACKAGE_CAIRO
++	select BR2_PACKAGE_GDK_PIXBUF
++	select BR2_PACKAGE_LIBGLIB2
++	select BR2_PACKAGE_LIBGTK2
++	select BR2_PACKAGE_PANGO
++	select BR2_PACKAGE_ATK
++	select BR2_PACKAGE_PCRE2
++	help
++	  libvte is "a library (libvte) implementing a terminal emulator widget for GTK+"
++
++	  https://github.com/GNOME/vte
+diff --git a/package/libvte/libvte.hash b/package/libvte/libvte.hash
+new file mode 100644
+index 0000000..f8c3ba7
+--- /dev/null
++++ b/package/libvte/libvte.hash
+@@ -0,0 +1,2 @@
++sha256 cf1708e3e573160e1db107014b3ef70888fefe6b668373fed70e8d1cac45a8c2 vte-0.50.1.tar.xz
++sha256 86cf0b81aa023fa93ed415653d51c96767f20b2d7334c893caba71e42654b0ae vte-0.28.2.tar.xz
+diff --git a/package/libvte/libvte.mk b/package/libvte/libvte.mk
+new file mode 100644
+index 0000000..e2e83af
+--- /dev/null
++++ b/package/libvte/libvte.mk
+@@ -0,0 +1,22 @@
++################################################################################
++#
++# libvte
++#
++################################################################################
++
++LIBVTE_VERSION_MAJOR = 0.28
++LIBVTE_VERSION_MINOR = 2
++LIBVTE_VERSION = $(LIBVTE_VERSION_MAJOR).$(LIBVTE_VERSION_MINOR)
++LIBVTE_SITE = http://ftp.gnome.org/pub/gnome/sources/vte/$(LIBVTE_VERSION_MAJOR)
++LIBVTE_SOURCE = vte-$(LIBVTE_VERSION).tar.xz
++LIBVTE_DEPENDENCIES = host-pkgconf cairo gdk-pixbuf libglib2 libgtk2 pango atk pcre2
++LIBVTE_INSTALL_STAGING = YES
++LIBVTE_CONF_OPTS = --enable-introspection=no --enable-vala=no --without-gnutls
++
++#define LIBVTE_POST_INSTALL_STAGING_HOOK_001
++##	ln -vsfT ./vte-2.91.pc $(STAGING_DIR)/usr/lib/pkgconfig/vte.pc
++#	bash -i
++#endef
++#LIBVTE_POST_INSTALL_STAGING_HOOKS += LIBVTE_POST_INSTALL_STAGING_HOOK_001
++
++$(eval $(autotools-package))
+diff --git a/package/lunzip/Config.in b/package/lunzip/Config.in
+new file mode 100644
+index 0000000..6aab591
+--- /dev/null
++++ b/package/lunzip/Config.in
+@@ -0,0 +1,10 @@
++comment "lunzip needs a toolchain w/ C++"
++	depends on !BR2_INSTALL_LIBSTDCPP
++
++config BR2_PACKAGE_LUNZIP
++	bool "lunzip"
++	depends on BR2_INSTALL_LIBSTDCPP
++	help
++	  Lunzip is the opposite of lzip.
++
++	  http://www.nongnu.org/lzip/lunzip.html
+diff --git a/package/lunzip/lunzip.hash b/package/lunzip/lunzip.hash
+new file mode 100644
+index 0000000..f65d1bd
+--- /dev/null
++++ b/package/lunzip/lunzip.hash
+@@ -0,0 +1 @@
++sha256 58bcfb3006952753b82e2ae1d77307c3a47e5779dfd183d3c2e11b73596aa3ab lunzip-1.9.tar.gz
+diff --git a/package/lunzip/lunzip.mk b/package/lunzip/lunzip.mk
+new file mode 100644
+index 0000000..94e40b8
+--- /dev/null
++++ b/package/lunzip/lunzip.mk
+@@ -0,0 +1,38 @@
++################################################################################
++#
++# lunzip
++#
++################################################################################
++
++LUNZIP_VERSION = 1.9
++LUNZIP_SITE = http://download.savannah.gnu.org/releases/lzip/lunzip
++
++define LUNZIP_CONFIGURE_CMDS
++	(cd $(@D); $(TARGET_MAKE_ENV) ./configure --prefix=/usr \
++		$(TARGET_CONFIGURE_OPTS) )
++endef
++
++define HOST_LUNZIP_CONFIGURE_CMDS
++	(cd $(@D); $(HOST_MAKE_ENV) ./configure --prefix=$(HOST_DIR) \
++		$(HOST_CONFIGURE_OPTS) )
++endef
++
++define LUNZIP_BUILD_CMDS
++	$(TARGET_MAKE_ENV) $(MAKE) -C $(@D)
++endef
++
++define HOST_LUNZIP_BUILD_CMDS
++	$(HOST_MAKE_ENV) $(MAKE) -C $(@D)
++endef
++
++define LUNZIP_INSTALL_TARGET_CMDS
++	$(TARGET_MAKE_ENV) $(MAKE) -C $(@D) DESTDIR=$(TARGET_DIR) install
++endef
++
++define HOST_LUNZIP_INSTALL_CMDS
++	$(HOST_MAKE_ENV) $(MAKE) -C $(@D) install
++endef
++
++# It's not autotools-based
++$(eval $(generic-package))
++$(eval $(host-generic-package))
+diff --git a/package/lxterminal/Config.in b/package/lxterminal/Config.in
+new file mode 100644
+index 0000000..2f5f80e
+--- /dev/null
++++ b/package/lxterminal/Config.in
+@@ -0,0 +1,8 @@
++config BR2_PACKAGE_LXTERMINAL
++	bool "lxterminal"
++	depends on BR2_PACKAGE_XORG7
++	select BR2_PACKAGE_LIBVTE
++	help
++	  lxterminal is "a desktop-independent VTE-based terminal emulator for LXDE without any unnecessary dependency"
++
++	  https://wiki.lxde.org/en/LXTerminal
+diff --git a/package/lxterminal/lxterminal.hash b/package/lxterminal/lxterminal.hash
+new file mode 100644
+index 0000000..6d218f2
+--- /dev/null
++++ b/package/lxterminal/lxterminal.hash
+@@ -0,0 +1 @@
++sha256 2a424653565f04f4459cc86756e583f3107ca90e5e81250804dced5f8236c7f9 lxterminal-0.3.0.tar.xz
+diff --git a/package/lxterminal/lxterminal.mk b/package/lxterminal/lxterminal.mk
+new file mode 100644
+index 0000000..c28f1aa
+--- /dev/null
++++ b/package/lxterminal/lxterminal.mk
+@@ -0,0 +1,13 @@
++################################################################################
++#
++# lxterminal
++#
++################################################################################
++
++LXTERMINAL_VERSION = 0.3.0
++#LXTERMINAL_SITE = $(call github,lxde,lxterminal,$(LXTERMINAL_VERSION))
++LXTERMINAL_SITE = http://downloads.sourceforge.net/project/lxde/LXTerminal%20%28terminal%20emulator%29/LXTerminal%20$(LXTERMINAL_VERSION)
++LXTERMINAL_SOURCE = lxterminal-$(LXTERMINAL_VERSION).tar.xz
++LXTERMINAL_DEPENDENCIES = host-pkgconf libvte
++
++$(eval $(autotools-package))
+diff --git a/package/startup-notification/Config.in b/package/startup-notification/Config.in
+index 24771ea..fc1943e 100644
+--- a/package/startup-notification/Config.in
++++ b/package/startup-notification/Config.in
+@@ -3,6 +3,7 @@ config BR2_PACKAGE_STARTUP_NOTIFICATION
+ 	depends on BR2_PACKAGE_XORG7
+ 	depends on BR2_USE_MMU # fork()
+ 	select BR2_PACKAGE_XLIB_LIBX11
++	select BR2_PACKAGE_XCB_UTIL
+ 	help
+ 	  Startup-notification is a library used to monitor application startup.
+ 
+diff --git a/package/startup-notification/startup-notification.hash b/package/startup-notification/startup-notification.hash
+index cadbf98..cf93e08 100644
+--- a/package/startup-notification/startup-notification.hash
++++ b/package/startup-notification/startup-notification.hash
+@@ -1,2 +1,3 @@
+ # Locally calculated
+ sha256	c2fa09f9a49d8b319e79638e49e967c682df8726006e03059b1ffca5ab82099c	startup-notification-0.9.tar.gz
++sha256	3c391f7e930c583095045cd2d10eb73a64f085c7fde9d260f2652c7cb3cfbe4a	startup-notification-0.12.tar.gz
+diff --git a/package/startup-notification/startup-notification.mk b/package/startup-notification/startup-notification.mk
+index b331408..62d8171 100644
+--- a/package/startup-notification/startup-notification.mk
++++ b/package/startup-notification/startup-notification.mk
+@@ -4,10 +4,10 @@
+ #
+ ################################################################################
+ 
+-STARTUP_NOTIFICATION_VERSION = 0.9
++STARTUP_NOTIFICATION_VERSION = 0.12
+ STARTUP_NOTIFICATION_SITE = http://freedesktop.org/software/startup-notification/releases
+ STARTUP_NOTIFICATION_INSTALL_STAGING = YES
+-STARTUP_NOTIFICATION_DEPENDENCIES = xlib_libX11
++STARTUP_NOTIFICATION_DEPENDENCIES = xlib_libX11 xcb-util
+ STARTUP_NOTIFICATION_CONF_ENV = lf_cv_sane_realloc=yes
+ STARTUP_NOTIFICATION_CONF_OPTS = --with-x \
+ 	--x-includes="$(STAGING_DIR)/usr/include/X11" \
+diff --git a/package/tint2/Config.in b/package/tint2/Config.in
+new file mode 100644
+index 0000000..b60a4a9
+--- /dev/null
++++ b/package/tint2/Config.in
+@@ -0,0 +1,21 @@
++config BR2_PACKAGE_TINT2
++	bool "tint2"
++	depends on BR2_PACKAGE_XORG7
++	depends on BR2_USE_MMU
++	select BR2_PACKAGE_XLIB_LIBX11
++	select BR2_PACKAGE_XLIB_LIBXINERAMA
++	select BR2_PACKAGE_XLIB_LIBXRENDER
++	select BR2_PACKAGE_XLIB_LIBXCOMPOSITE
++	select BR2_PACKAGE_XLIB_LIBXDAMAGE
++	select BR2_PACKAGE_XLIB_LIBXRANDR
++	select BR2_PACKAGE_CAIRO
++	select BR2_PACKAGE_PANGO
++	select BR2_PACKAGE_LIBGLIB2
++	select BR2_PACKAGE_IMLIB2
++	select BR2_PACKAGE_LIBGTK2
++	select BR2_PACKAGE_LIBRSVG
++	select BR2_PACKAGE_STARTUP_NOTIFICATION
++	help
++	  tint2 is "a lightweight panel/taskbar for Linux and BSD"
++
++	  https://gitlab.com/o9000/tint2
+diff --git a/package/tint2/tint2.hash b/package/tint2/tint2.hash
+new file mode 100644
+index 0000000..eef5594
+--- /dev/null
++++ b/package/tint2/tint2.hash
+@@ -0,0 +1,3 @@
++# Locally calculated
++sha256 8f81232ba4ba4e2460d1d4737459fb257d6853bcb718a38a56d400d579cbaac5 tint2-for-buildroot-15.2.tar.gz
++sha256 484124459e4573fdc41c32964b2ff6207195f078d27927e95f9c526bfd72d259 tint2-for-buildroot-16.0.tar.gz
+diff --git a/package/tint2/tint2.mk b/package/tint2/tint2.mk
+new file mode 100644
+index 0000000..e406c06
+--- /dev/null
++++ b/package/tint2/tint2.mk
+@@ -0,0 +1,13 @@
++################################################################################
++#
++# tint2
++#
++################################################################################
++
++#TINT2_VERSION = 15.2
++TINT2_VERSION = 16.0
++TINT2_SOURCE = tint2-for-buildroot-$(TINT2_VERSION).tar.gz
++TINT2_SITE = https://github.com/AndreiBoracMirrors/tint2/archive
++TINT2_DEPENDENCIES = host-pkgconf xlib_libX11 xlib_libXinerama xlib_libXrender xlib_libXcomposite xlib_libXdamage cairo pango libglib2 imlib2 libgtk2 librsvg startup-notification
++
++$(eval $(cmake-package))
+diff --git a/package/xbindkeys/Config.in b/package/xbindkeys/Config.in
+new file mode 100644
+index 0000000..9055aa3
+--- /dev/null
++++ b/package/xbindkeys/Config.in
+@@ -0,0 +1,8 @@
++config BR2_PACKAGE_XBINDKEYS
++	bool "xbindkeys"
++	depends on BR2_PACKAGE_XORG7
++	select BR2_PACKAGE_LIBX11
++	help
++	  xbindkeys is "a program that allows you to launch shell commands with your keyboard or your mouse under X Window"
++
++	  http://www.nongnu.org/xbindkeys/
+diff --git a/package/xbindkeys/xbindkeys.hash b/package/xbindkeys/xbindkeys.hash
+new file mode 100644
+index 0000000..5446778
+--- /dev/null
++++ b/package/xbindkeys/xbindkeys.hash
+@@ -0,0 +1 @@
++sha256 6c0d18be19fc19ab9b4595edf3a23c0a6946c8a5eb5c1bc395471c8f9a710d18 xbindkeys-1.8.6.tar.gz
+diff --git a/package/xbindkeys/xbindkeys.mk b/package/xbindkeys/xbindkeys.mk
+new file mode 100644
+index 0000000..780c1b8
+--- /dev/null
++++ b/package/xbindkeys/xbindkeys.mk
+@@ -0,0 +1,12 @@
++################################################################################
++#
++# xbindkeys
++#
++################################################################################
++
++XBINDKEYS_VERSION = 1.8.6
++XBINDKEYS_SITE = http://www.nongnu.org/xbindkeys
++XBINDKEYS_DEPENDENCIES = host-pkgconf xlib_libX11
++XBINDKEYS_CONF_OPTS = --disable-fork --disable-tk --disable-guile
++
++$(eval $(autotools-package))
+diff --git a/package/xboard/Config.in b/package/xboard/Config.in
+new file mode 100644
+index 0000000..710c496
+--- /dev/null
++++ b/package/xboard/Config.in
+@@ -0,0 +1,19 @@
++config BR2_PACKAGE_XBOARD
++	bool "xboard"
++	depends on BR2_PACKAGE_XORG7
++	depends on BR2_TOOLCHAIN_HAS_SYNC_4 # librsvg -> pango -> harfbuzz
++	depends on BR2_INSTALL_LIBSTDCPP # libgtk2 -> pango
++	depends on BR2_TOOLCHAIN_HAS_THREADS # libglib2
++	depends on BR2_USE_WCHAR # libgtk2 -> glib2
++	depends on BR2_USE_MMU # libglib2
++	select BR2_PACKAGE_LIBX11
++	select BR2_PACKAGE_CAIRO
++	select BR2_PACKAGE_GDK_PIXBUF
++	select BR2_PACKAGE_LIBGLIB2
++	select BR2_PACKAGE_LIBGTK2
++	select BR2_PACKAGE_PANGO
++	select BR2_PACKAGE_LIBRSVG
++	help
++	  xboard is "a graphical user interface for chess in all its major forms"
++
++	  https://www.gnu.org/software/xboard/
+diff --git a/package/xboard/xboard.hash b/package/xboard/xboard.hash
+new file mode 100644
+index 0000000..fe1fadb
+--- /dev/null
++++ b/package/xboard/xboard.hash
+@@ -0,0 +1 @@
++sha256 2b2e53e8428ad9b6e8dc8a55b3a5183381911a4dae2c0072fa96296bbb1970d6 xboard-4.9.1.tar.gz
+diff --git a/package/xboard/xboard.mk b/package/xboard/xboard.mk
+new file mode 100644
+index 0000000..fb9cab5
+--- /dev/null
++++ b/package/xboard/xboard.mk
+@@ -0,0 +1,11 @@
++################################################################################
++#
++# xboard
++#
++################################################################################
++
++XBOARD_VERSION = 4.9.1
++XBOARD_SITE = $(BR2_GNU_MIRROR)/xboard
++XBOARD_DEPENDENCIES = host-pkgconf cairo gdk-pixbuf libglib2 libgtk2 pango librsvg
++
++$(eval $(autotools-package))

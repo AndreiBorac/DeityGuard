@@ -1,0 +1,40 @@
+diff --git a/src/util/common.c b/src/util/common.c
+index c377316..1d7d3f9 100644
+--- a/src/util/common.c
++++ b/src/util/common.c
+@@ -346,6 +346,7 @@ pid_t tint_exec(const char *command,
+             panel_y2 = panel->posy + panel->area.height;
+         }
+ 
++#if 0
+         setenv("TINT2_CONFIG", config_path, 1);
+         setenvd("TINT2_BUTTON_X", x);
+         setenvd("TINT2_BUTTON_Y", y);
+@@ -361,8 +362,11 @@ pid_t tint_exec(const char *command,
+         setenvd("TINT2_BUTTON_PANEL_Y1", panel_y1);
+         setenvd("TINT2_BUTTON_PANEL_X2", panel_x2);
+         setenvd("TINT2_BUTTON_PANEL_Y2", panel_y2);
++#endif
+     } else {
++#if 0
+         setenv("TINT2_CONFIG", config_path, 1);
++#endif
+     }
+ 
+     if (!command)
+@@ -428,6 +432,7 @@ pid_t tint_exec(const char *command,
+ #endif // HAVE_SN
+     }
+ 
++#if 0
+     unsetenv("TINT2_CONFIG");
+     unsetenv("TINT2_BUTTON_X");
+     unsetenv("TINT2_BUTTON_Y");
+@@ -443,6 +448,7 @@ pid_t tint_exec(const char *command,
+     unsetenv("TINT2_BUTTON_PANEL_Y1");
+     unsetenv("TINT2_BUTTON_PANEL_X2");
+     unsetenv("TINT2_BUTTON_PANEL_Y2");
++#endif
+ 
+     return pid;
+ }

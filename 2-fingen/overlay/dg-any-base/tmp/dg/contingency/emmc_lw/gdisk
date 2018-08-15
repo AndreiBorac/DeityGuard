@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+
+set -o xtrace
+set -o errexit
+set -o nounset
+set -o pipefail
+shopt -s failglob
+shopt -s nullglob
+
+. /tmp/dg/contingency/emmc_lw/common.sh
+
+if [ "$#" != "1" ]
+then
+  set +o xtrace
+  echo "!! expected exactly one argument"
+  echo "!! bye"
+  exit 1
+fi
+
+check_is_mmcblk0 "$1"
+
+if [ "$is_mmcblk0" != "y" ]
+then
+  # pass through
+  exec /usr/sbin/gdisk "$@"
+fi
+
+check_wr_mmcblk0
+
+gpt_model_rd /dev/mmcblk0
+
+/usr/sbin/gdisk "$tmp_model"
+
+accurate_nt_ "$tmp_model" "$tmp_model_trk"
+if [ "$accurate_nt_result" == "y" ]
+then
+  set +o xtrace
+  echo -n "commit? (y/N) "
+  read
+  set -o xtrace
+  if [ "$REPLY" == "y" ]
+  then
+    gpt_model_wb /dev/mmcblk0
+  else
+    gpt_model_wb /dev/null
+  fi
+else
+  gpt_model_wb /dev/null
+fi
+
+set +o xtrace
+echo "+OK (gdisk (wrapper))"

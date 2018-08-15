@@ -1,0 +1,58 @@
+diff --git a/package/sunxi-tools/Config.in b/package/sunxi-tools/Config.in
+index 16bf2dc..dc0d51f 100644
+--- a/package/sunxi-tools/Config.in
++++ b/package/sunxi-tools/Config.in
+@@ -1,9 +1,7 @@
+ config BR2_PACKAGE_SUNXI_TOOLS
+-	bool "sunxi nand-part"
++	bool "sunxi-tools fel"
+ 	depends on BR2_arm
+ 	help
+-	  nand-part is part of sunxi-tools for Allwinner A10 (aka sun4i) and
+-	  A13 (aka sun5i) based devices. It is a tool to repartition the
+-	  internal NAND on sunxi devices.
++	  sunxi-fel is part of sunxi-tools for Allwinner based devices.
+ 
+ 	  http://linux-sunxi.org/Sunxi-tools
+diff --git a/package/sunxi-tools/sunxi-tools.mk b/package/sunxi-tools/sunxi-tools.mk
+index 3a44cf6..d001a17 100644
+--- a/package/sunxi-tools/sunxi-tools.mk
++++ b/package/sunxi-tools/sunxi-tools.mk
+@@ -4,33 +4,20 @@
+ #
+ ################################################################################
+ 
+-SUNXI_TOOLS_VERSION = v1.4.1
++SUNXI_TOOLS_VERSION = v1.4.2
+ SUNXI_TOOLS_SITE = $(call github,linux-sunxi,sunxi-tools,$(SUNXI_TOOLS_VERSION))
+ SUNXI_TOOLS_LICENSE = GPL-2.0+
+ SUNXI_TOOLS_LICENSE_FILES = LICENSE.md
+-HOST_SUNXI_TOOLS_DEPENDENCIES = host-libusb host-pkgconf
+-FEX2BIN = $(HOST_DIR)/bin/fex2bin
+-
+-define HOST_SUNXI_TOOLS_BUILD_CMDS
+-	$(HOST_MAKE_ENV) $(MAKE) CC="$(HOSTCC)" PREFIX=$(HOST_DIR) \
+-		EXTRA_CFLAGS="$(HOST_CFLAGS)" LDFLAGS="$(HOST_LDFLAGS)" \
+-		-C $(@D) tools
+-endef
+-
+-define HOST_SUNXI_TOOLS_INSTALL_CMDS
+-	$(HOST_MAKE_ENV) $(MAKE) PREFIX=$(HOST_DIR) \
+-		-C $(@D) install-tools
+-endef
++SUNXI_TOOLS_DEPENDENCIES = host-pkgconf libusb
+ 
+ define SUNXI_TOOLS_BUILD_CMDS
+ 	$(TARGET_MAKE_ENV) $(MAKE) CC="$(TARGET_CC)" PREFIX=/usr \
+ 		EXTRA_CFLAGS="$(TARGET_CFLAGS)" LDFLAGS="$(TARGET_LDFLAGS)" \
+-		-C $(@D) sunxi-nand-part
++		-C $(@D) sunxi-fel
+ endef
+ 
+ define SUNXI_TOOLS_INSTALL_TARGET_CMDS
+-	$(INSTALL) -D -m 0755 $(@D)/sunxi-nand-part $(TARGET_DIR)/usr/bin/sunxi-nand-part
++	$(INSTALL) -D -m 0755 $(@D)/sunxi-fel $(TARGET_DIR)/usr/bin/sunxi-fel
+ endef
+ 
+ $(eval $(generic-package))
+-$(eval $(host-generic-package))

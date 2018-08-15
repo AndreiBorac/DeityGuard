@@ -1,0 +1,273 @@
+diff --git a/package/busybox/busybox.hash b/package/busybox/busybox.hash
+index 3e1956d..06bebdf 100644
+--- a/package/busybox/busybox.hash
++++ b/package/busybox/busybox.hash
+@@ -3,3 +3,4 @@ md5	476186f4bab81781dab2369bfd42734e	busybox-1.27.2.tar.bz2
+ sha1	11669e223cc38de646ce26080e91ca29b8d42ad9	busybox-1.27.2.tar.bz2
+ # License files, locally calculated
+ sha256	bbfc9843646d483c334664f651c208b9839626891d8f17604db2146962f43548	LICENSE
++sha256 9d4be516b61e6480f156b11eb42577a13529f75d3383850bb75c50c285de63df busybox-1.27.2.tar.bz2
+diff --git a/package/bzip2/bzip2.hash b/package/bzip2/bzip2.hash
+index 60b0a19..89d0843 100644
+--- a/package/bzip2/bzip2.hash
++++ b/package/bzip2/bzip2.hash
+@@ -1,2 +1,3 @@
+ # From http://www.bzip.org/downloads.html
+ md5	00b516f4704d4a7cb50a1d97e6e8e15b	bzip2-1.0.6.tar.gz
++sha256 a2848f34fcd5d6cf47def00461fcb528a0484d8edef8208d6d2e2909dc61d9cd bzip2-1.0.6.tar.gz
+diff --git a/package/gettext/gettext.hash b/package/gettext/gettext.hash
+index a2ab298..f799145 100644
+--- a/package/gettext/gettext.hash
++++ b/package/gettext/gettext.hash
+@@ -3,3 +3,4 @@ md5	df3f5690eaa30fd228537b00cb7b7590	gettext-0.19.8.1.tar.xz
+ sha1	e0fe90ede22f7f16bbde7bdea791a835f2773fc9	gettext-0.19.8.1.tar.xz
+ # License files, locally calculated
+ sha256	8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903	COPYING
++sha256 105556dbc5c3fbbc2aa0edb46d22d055748b6f5c7cd7a8d99f8e7eb84e938be4 gettext-0.19.8.1.tar.xz
+diff --git a/package/giflib/giflib.hash b/package/giflib/giflib.hash
+index cdd7bbd..50a8b23 100644
+--- a/package/giflib/giflib.hash
++++ b/package/giflib/giflib.hash
+@@ -1,3 +1,4 @@
+ # From http://sourceforge.net/projects/giflib/files
+ md5	2c171ced93c0e83bb09e6ccad8e3ba2b	giflib-5.1.4.tar.bz2
+ sha1	5f1157cfc377916280849e247b8e34fa0446513f	giflib-5.1.4.tar.bz2
++sha256 df27ec3ff24671f80b29e6ab1c4971059c14ac3db95406884fc26574631ba8d5 giflib-5.1.4.tar.bz2
+diff --git a/package/haveged/haveged.hash b/package/haveged/haveged.hash
+index d1133b6..e18109a 100644
+--- a/package/haveged/haveged.hash
++++ b/package/haveged/haveged.hash
+@@ -1,2 +1,3 @@
+ # From http://www.issihosts.com/haveged/verify/haveged-1.9.1.sha1
+ sha1	ab7234b7f57dbb7d500a5ab3cbf0494715ce6499	haveged-1.9.1.tar.gz
++sha256 9c2363ed9542a6784ff08e247182137e71f2ddb79e8e6c1ac4ad50d21ced3715 haveged-1.9.1.tar.gz
+diff --git a/package/imlib2/imlib2.hash b/package/imlib2/imlib2.hash
+index 0c234c8..d975727 100644
+--- a/package/imlib2/imlib2.hash
++++ b/package/imlib2/imlib2.hash
+@@ -1,3 +1,4 @@
+ # From https://sourceforge.net/projects/enlightenment/files/imlib2-src/1.4.10/
+ md5 a0de8524592bbd9f24fcc6cb8352137c  imlib2-1.4.10.tar.bz2
+ sha1 664df65c6265a2825d685d2f3a4f0d072eb626ac  imlib2-1.4.10.tar.bz2
++sha256 3f698cd285cbbfc251c1d6405f249b99fafffafa5e0a5ecf0ca7ae49bbc0a272 imlib2-1.4.10.tar.bz2
+diff --git a/package/iptables/iptables.hash b/package/iptables/iptables.hash
+index b673c8a..a1d6c8b 100644
+--- a/package/iptables/iptables.hash
++++ b/package/iptables/iptables.hash
+@@ -1,3 +1,4 @@
+ # From ftp://ftp.netfilter.org/pub/iptables/iptables-1.6.1.tar.bz2.{md5sum,sha1sum}
+ md5	ab38a33806b6182c6f53d6afb4619add	iptables-1.6.1.tar.bz2
+ sha1	b2592490ca7a6c2cd0f069e167a4337c86acdf91	iptables-1.6.1.tar.bz2
++sha256 0fc2d7bd5d7be11311726466789d4c65fb4c8e096c9182b56ce97440864f0cf5 iptables-1.6.1.tar.bz2
+diff --git a/package/libassuan/libassuan.hash b/package/libassuan/libassuan.hash
+index 01ade11..b872ded 100644
+--- a/package/libassuan/libassuan.hash
++++ b/package/libassuan/libassuan.hash
+@@ -1,2 +1,3 @@
+ # From https://www.gnupg.org/download/integrity_check.html
+ sha1 27391cf4a820b5350ea789c30661830c9a271518  libassuan-2.4.3.tar.bz2
++sha256 22843a3bdb256f59be49842abf24da76700354293a066d82ade8134bb5aa2b71 libassuan-2.4.3.tar.bz2
+diff --git a/package/libevent/libevent.hash b/package/libevent/libevent.hash
+index 21381c8..40723ed 100644
+--- a/package/libevent/libevent.hash
++++ b/package/libevent/libevent.hash
+@@ -1,3 +1,4 @@
+ # locally computed
+ md5	f3eeaed018542963b7d2416ef1135ecc	libevent-2.1.8-stable.tar.gz
+ sha1	2a1b8bb7a262d3fd0ed6a080a20991a6eed675ec	libevent-2.1.8-stable.tar.gz
++sha256 965cc5a8bb46ce4199a47e9b2c9e1cae3b137e8356ffdad6d94d3b9069b71dc2 libevent-2.1.8-stable.tar.gz
+diff --git a/package/libmnl/libmnl.hash b/package/libmnl/libmnl.hash
+index 98385b8..c9db935 100644
+--- a/package/libmnl/libmnl.hash
++++ b/package/libmnl/libmnl.hash
+@@ -1,3 +1,4 @@
+ # From ftp://ftp.netfilter.org/pub/libmnl/libmnl-1.0.4.tar.bz2.{md5sum,sha1sum}
+ md5	be9b4b5328c6da1bda565ac5dffadb2d	libmnl-1.0.4.tar.bz2
+ sha1	2db40dea612e88c62fd321906be40ab5f8f1685a	libmnl-1.0.4.tar.bz2
++sha256 171f89699f286a5854b72b91d06e8f8e3683064c5901fb09d954a9ab6f551f81 libmnl-1.0.4.tar.bz2
+diff --git a/package/libnftnl/libnftnl.hash b/package/libnftnl/libnftnl.hash
+index 63271e0..47eab6b 100644
+--- a/package/libnftnl/libnftnl.hash
++++ b/package/libnftnl/libnftnl.hash
+@@ -1,2 +1,3 @@
+ # From http://www.netfilter.org/projects/libnftnl/downloads.html#libnftnl-1.0.7
+ sha1	381b2b3cbb3fad186cb3f57bbf32d70f0b3c3c8e	libnftnl-1.0.7.tar.bz2
++sha256 9bb66ecbc64b8508249402f0093829f44177770ad99f6042b86b3a467d963982 libnftnl-1.0.7.tar.bz2
+diff --git a/package/linux-headers/linux-headers.hash b/package/linux-headers/linux-headers.hash
+new file mode 100644
+index 0000000..68088e6
+--- /dev/null
++++ b/package/linux-headers/linux-headers.hash
+@@ -0,0 +1 @@
++sha256 ede2c22a559e1d894161d53e1d634ee969380a159642aafc0c9c268daf8eaafe linux-4.4.102.tar.xz
+diff --git a/package/mmc-utils/mmc-utils.hash b/package/mmc-utils/mmc-utils.hash
+index 35cd580..a28153c 100644
+--- a/package/mmc-utils/mmc-utils.hash
++++ b/package/mmc-utils/mmc-utils.hash
+@@ -1,2 +1,3 @@
+ # Locally computed
+ sha256 92ba148648688fca6e0e0e30248ebc6b432bea55584760f20a013583f20a109d  mmc-utils-37c86e60c0442fef570b75cd81aeb1db4d0cbafd.tar.gz
++sha256 807dfa4d5ed976eae888f4cb45262872cc8c502b0d0b17ab87a043d66657bee5 mmc-utils-for-buildroot-001.tar.gz
+diff --git a/package/mpc/mpc.hash b/package/mpc/mpc.hash
+index 98f1447..b78c82b 100644
+--- a/package/mpc/mpc.hash
++++ b/package/mpc/mpc.hash
+@@ -1,2 +1,3 @@
+ # From http://www.multiprecision.org/index.php?prog=mpc&page=download
+ sha1	b8be66396c726fdc36ebb0f692ed8a8cca3bcc66	mpc-1.0.3.tar.gz
++sha256 617decc6ea09889fb08ede330917a00b16809b8db88c29c31bfbb49cbf88ecc3 mpc-1.0.3.tar.gz
+diff --git a/package/nbd/nbd.hash b/package/nbd/nbd.hash
+index 03234fd..d866f96 100644
+--- a/package/nbd/nbd.hash
++++ b/package/nbd/nbd.hash
+@@ -1,3 +1,4 @@
+ # From http://sourceforge.net/projects/nbd/files/nbd/3.13/
+ md5	f52a4ef8979d81e6c15a745236582fdf	nbd-3.15.2.tar.xz
+ sha1	c8248dd76641a31189735407cd4d55fe63969c08	nbd-3.15.2.tar.xz
++sha256 cf188ebdad3d317742b874fb8669faa437ee9fab4005e71b049bc301011af344 nbd-3.15.2.tar.xz
+diff --git a/package/nftables/nftables.hash b/package/nftables/nftables.hash
+index a743476..8320ccc 100644
+--- a/package/nftables/nftables.hash
++++ b/package/nftables/nftables.hash
+@@ -1,2 +1,3 @@
+ # From http://www.netfilter.org/projects/nftables/downloads.html#nftables-0.7
+ sha1	c003fa8b63b1b44c52de345a4d84487d81865a98	nftables-0.7.tar.bz2
++sha256 fe639239d801ce5890397f6f4391c58a934bfc27d8b7d5ef922692de5ec4ed43 nftables-0.7.tar.bz2
+diff --git a/package/openbox/openbox.hash b/package/openbox/openbox.hash
+index a8696b3..0d6ef58 100644
+--- a/package/openbox/openbox.hash
++++ b/package/openbox/openbox.hash
+@@ -1,2 +1,3 @@
+ # Locally computed:
+ sha256  abe75855cc5616554ffd47134ad15291fe37ebbebf1a80b69cbde9d670f0e26d  openbox-3.6.1.tar.xz
++sha256 8b4ac0760018c77c0044fab06a4f0c510ba87eae934d9983b10878483bde7ef7 openbox-3.6.1.tar.gz
+diff --git a/package/pixman/pixman.hash b/package/pixman/pixman.hash
+index d5b8934..e105db2 100644
+--- a/package/pixman/pixman.hash
++++ b/package/pixman/pixman.hash
+@@ -1,2 +1,3 @@
+ # From http://lists.x.org/archives/xorg-announce/2016-January/002672.html
+ sha1	367698744e74d6d4f363041482965b9ea7fbe4a5	pixman-0.34.0.tar.bz2
++sha256 39ba3438f3d17c464b0cb8be006dacbca0ab5aee97ebde69fec7ecdbf85794a0 pixman-0.34.0.tar.bz2
+diff --git a/package/procps-ng/procps-ng.hash b/package/procps-ng/procps-ng.hash
+index 62d6172..be4d30c 100644
+--- a/package/procps-ng/procps-ng.hash
++++ b/package/procps-ng/procps-ng.hash
+@@ -1,3 +1,4 @@
+ # From http://sourceforge.net/projects/procps-ng/files/Production/
+ md5	957e42e8b193490b2111252e4a2b443c	procps-ng-3.3.12.tar.xz
+ sha1	82c0745f150f1385ca01fe7d24f05f74e31c94c6	procps-ng-3.3.12.tar.xz
++sha256 6ed65ab86318f37904e8f9014415a098bec5bc53653e5d9ab404f95ca5e1a7d4 procps-ng-3.3.12.tar.xz
+diff --git a/package/sunxi-tools/sunxi-tools.hash b/package/sunxi-tools/sunxi-tools.hash
+index efb2b54..db10a4e 100644
+--- a/package/sunxi-tools/sunxi-tools.hash
++++ b/package/sunxi-tools/sunxi-tools.hash
+@@ -1,2 +1,3 @@
+ # Locally calculated
+ sha256	da5d762608517b4b2e9bd392bd9a63afae3973d9c8264cbcfb757ddac8120d1b  sunxi-tools-v1.4.1.tar.gz
++sha256 81f48014a520cb83cac4e17f5ae627a637c4d6a422b60c693c5a705c92e43822 sunxi-tools-v1.4.2.tar.gz
+diff --git a/package/x11r7/xdata_xbitmaps/xdata_xbitmaps.hash b/package/x11r7/xdata_xbitmaps/xdata_xbitmaps.hash
+index 3e5fb32..7cee4a7 100644
+--- a/package/x11r7/xdata_xbitmaps/xdata_xbitmaps.hash
++++ b/package/x11r7/xdata_xbitmaps/xdata_xbitmaps.hash
+@@ -1,2 +1,3 @@
+ # From http://lists.x.org/archives/xorg-announce/2010-December/001563.html
+ sha1	578afff7e4912192b524c25254cf7f54c16e57d8	xbitmaps-1.1.1.tar.bz2
++sha256 3671b034356bbc4d32d052808cf646c940ec8b2d1913adac51b1453e41aa1e9d xbitmaps-1.1.1.tar.bz2
+diff --git a/package/x11r7/xfont_encodings/xfont_encodings.hash b/package/x11r7/xfont_encodings/xfont_encodings.hash
+index 56c1ad2..5b3079f 100644
+--- a/package/x11r7/xfont_encodings/xfont_encodings.hash
++++ b/package/x11r7/xfont_encodings/xfont_encodings.hash
+@@ -1,2 +1,3 @@
+ # From http://lists.x.org/archives/xorg-announce/2010-October/001466.html
+ sha1	24ace2470403f85a0d393769204029bd8247992a	encodings-1.0.4.tar.bz2
++sha256 ced6312988a45d23812c2ac708b4595f63fd7a49c4dcd9f66bdcd50d1057d539 encodings-1.0.4.tar.bz2
+diff --git a/package/x11r7/xfont_font-bh-ttf/xfont_font-bh-ttf.hash b/package/x11r7/xfont_font-bh-ttf/xfont_font-bh-ttf.hash
+index 8df8e4b..c19e509 100644
+--- a/package/x11r7/xfont_font-bh-ttf/xfont_font-bh-ttf.hash
++++ b/package/x11r7/xfont_font-bh-ttf/xfont_font-bh-ttf.hash
+@@ -1,2 +1,3 @@
+ # From http://lists.x.org/archives/xorg-announce/2010-November/001537.html
+ sha1	f42ebd527096011040a312e0f9cdf78d64177419	font-bh-ttf-1.0.3.tar.bz2
++sha256 1b4bea63271b4db0726b5b52c97994c3313b6023510349226908090501abd25f font-bh-ttf-1.0.3.tar.bz2
+diff --git a/package/x11r7/xproto_compositeproto/xproto_compositeproto.hash b/package/x11r7/xproto_compositeproto/xproto_compositeproto.hash
+index c6ef73c..cfb58dd 100644
+--- a/package/x11r7/xproto_compositeproto/xproto_compositeproto.hash
++++ b/package/x11r7/xproto_compositeproto/xproto_compositeproto.hash
+@@ -1,3 +1,4 @@
+ # From http://article.gmane.org/gmane.comp.freedesktop.xorg.announce/1193
+ md5	98482f65ba1e74a08bf5b056a4031ef0	compositeproto-0.4.2.tar.bz2
+ sha1	aa7b5abcfd5bbfad7cb681ce89dc1d6e381e3044	compositeproto-0.4.2.tar.bz2
++sha256 049359f0be0b2b984a8149c966dd04e8c58e6eade2a4a309cf1126635ccd0cfc compositeproto-0.4.2.tar.bz2
+diff --git a/package/x11r7/xproto_damageproto/xproto_damageproto.hash b/package/x11r7/xproto_damageproto/xproto_damageproto.hash
+index e5064b6..440eabf 100644
+--- a/package/x11r7/xproto_damageproto/xproto_damageproto.hash
++++ b/package/x11r7/xproto_damageproto/xproto_damageproto.hash
+@@ -1,3 +1,4 @@
+ # From http://article.gmane.org/gmane.comp.freedesktop.xorg.announce/1194
+ md5	998e5904764b82642cc63d97b4ba9e95	damageproto-1.2.1.tar.bz2
+ sha1	bd0f0f4dc8f37eaabd9279d10fe2889710507358	damageproto-1.2.1.tar.bz2
++sha256 5c7c112e9b9ea8a9d5b019e5f17d481ae20f766cb7a4648360e7c1b46fc9fc5b damageproto-1.2.1.tar.bz2
+diff --git a/package/x11r7/xproto_fixesproto/xproto_fixesproto.hash b/package/x11r7/xproto_fixesproto/xproto_fixesproto.hash
+index d19f392..2c79e35 100644
+--- a/package/x11r7/xproto_fixesproto/xproto_fixesproto.hash
++++ b/package/x11r7/xproto_fixesproto/xproto_fixesproto.hash
+@@ -1,3 +1,4 @@
+ # From http://article.gmane.org/gmane.comp.freedesktop.xorg.announce/1352
+ md5	e7431ab84d37b2678af71e29355e101d	fixesproto-5.0.tar.bz2
+ sha1	ab605af5da8c98c0c2f8b2c578fed7c864ee996a	fixesproto-5.0.tar.bz2
++sha256 ba2f3f31246bdd3f2a0acf8bd3b09ba99cab965c7fb2c2c92b7dc72870e424ce fixesproto-5.0.tar.bz2
+diff --git a/package/x11r7/xproto_resourceproto/xproto_resourceproto.hash b/package/x11r7/xproto_resourceproto/xproto_resourceproto.hash
+index 5ceb1c0..7b97b24 100644
+--- a/package/x11r7/xproto_resourceproto/xproto_resourceproto.hash
++++ b/package/x11r7/xproto_resourceproto/xproto_resourceproto.hash
+@@ -1,3 +1,4 @@
+ # From http://article.gmane.org/gmane.comp.freedesktop.xorg.announce/1404
+ md5	cfdb57dae221b71b2703f8e2980eaaf4	resourceproto-1.2.0.tar.bz2
+ sha1	9ff9bb9243b0474330959dc3853973523c9dd9ce	resourceproto-1.2.0.tar.bz2
++sha256 3c66003a6bdeb0f70932a9ed3cf57cc554234154378d301e0c5cfa189d8f6818 resourceproto-1.2.0.tar.bz2
+diff --git a/package/x11r7/xproto_xf86bigfontproto/xproto_xf86bigfontproto.hash b/package/x11r7/xproto_xf86bigfontproto/xproto_xf86bigfontproto.hash
+index b0ab8ae..aea0f12 100644
+--- a/package/x11r7/xproto_xf86bigfontproto/xproto_xf86bigfontproto.hash
++++ b/package/x11r7/xproto_xf86bigfontproto/xproto_xf86bigfontproto.hash
+@@ -1,3 +1,4 @@
+ # From http://article.gmane.org/gmane.comp.freedesktop.xorg.announce/734
+ md5	120e226ede5a4687b25dd357cc9b8efe	xf86bigfontproto-1.2.0.tar.bz2
+ sha1	312a2ea708b257520c1af4393b69d73a393a478f	xf86bigfontproto-1.2.0.tar.bz2
++sha256 ba9220e2c4475f5ed2ddaa7287426b30089e4d29bd58d35fad57ba5ea43e1648 xf86bigfontproto-1.2.0.tar.bz2
+diff --git a/package/x11r7/xproto_xf86dgaproto/xproto_xf86dgaproto.hash b/package/x11r7/xproto_xf86dgaproto/xproto_xf86dgaproto.hash
+index 36284fc..8a8c3e6 100644
+--- a/package/x11r7/xproto_xf86dgaproto/xproto_xf86dgaproto.hash
++++ b/package/x11r7/xproto_xf86dgaproto/xproto_xf86dgaproto.hash
+@@ -1,3 +1,4 @@
+ # From http://article.gmane.org/gmane.comp.freedesktop.xorg.announce/817
+ md5	a036dc2fcbf052ec10621fd48b68dbb1	xf86dgaproto-2.1.tar.bz2
+ sha1	97a06120e7195c968875e8ba42e82c90ab54948b	xf86dgaproto-2.1.tar.bz2
++sha256 ac5ef65108e1f2146286e53080975683dae49fc94680042e04bd1e2010e99050 xf86dgaproto-2.1.tar.bz2
+diff --git a/package/x11r7/xproto_xf86driproto/xproto_xf86driproto.hash b/package/x11r7/xproto_xf86driproto/xproto_xf86driproto.hash
+index 85d4bfc..68e31e6 100644
+--- a/package/x11r7/xproto_xf86driproto/xproto_xf86driproto.hash
++++ b/package/x11r7/xproto_xf86driproto/xproto_xf86driproto.hash
+@@ -1,3 +1,4 @@
+ # From http://article.gmane.org/gmane.comp.freedesktop.xorg.announce/1310
+ md5	1d716d0dac3b664e5ee20c69d34bc10e	xf86driproto-2.1.1.tar.bz2
+ sha1	23e861f40ba0f0cbbfd7db7ba2ef623762ffca17	xf86driproto-2.1.1.tar.bz2
++sha256 9c4b8d7221cb6dc4309269ccc008a22753698ae9245a398a59df35f1404d661f xf86driproto-2.1.1.tar.bz2
+diff --git a/package/x11r7/xproto_xf86vidmodeproto/xproto_xf86vidmodeproto.hash b/package/x11r7/xproto_xf86vidmodeproto/xproto_xf86vidmodeproto.hash
+index d80749b..bf13df3 100644
+--- a/package/x11r7/xproto_xf86vidmodeproto/xproto_xf86vidmodeproto.hash
++++ b/package/x11r7/xproto_xf86vidmodeproto/xproto_xf86vidmodeproto.hash
+@@ -1,3 +1,4 @@
+ # From http://article.gmane.org/gmane.comp.freedesktop.xorg.announce/1311
+ md5	e793ecefeaecfeabd1aed6a01095174e	xf86vidmodeproto-2.3.1.tar.bz2
+ sha1	11d54c3210887631ea71e8f8030a77692e964fc4	xf86vidmodeproto-2.3.1.tar.bz2
++sha256 45d9499aa7b73203fd6b3505b0259624afed5c16b941bd04fcf123e5de698770 xf86vidmodeproto-2.3.1.tar.bz2
+diff --git a/package/x11r7/xproto_xineramaproto/xproto_xineramaproto.hash b/package/x11r7/xproto_xineramaproto/xproto_xineramaproto.hash
+index 162c994..4a30841 100644
+--- a/package/x11r7/xproto_xineramaproto/xproto_xineramaproto.hash
++++ b/package/x11r7/xproto_xineramaproto/xproto_xineramaproto.hash
+@@ -1,3 +1,4 @@
+ # From http://article.gmane.org/gmane.comp.freedesktop.xorg.announce/1312
+ md5	9959fe0bfb22a0e7260433b8d199590a	xineramaproto-1.2.1.tar.bz2
+ sha1	818bffc16139d6e3de4344c83f00c495d3536753	xineramaproto-1.2.1.tar.bz2
++sha256 977574bb3dc192ecd9c55f59f991ec1dff340be3e31392c95deff423da52485b xineramaproto-1.2.1.tar.bz2

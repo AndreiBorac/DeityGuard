@@ -1,0 +1,25 @@
+diff --git a/package/squashfs/squashfs.hash b/package/squashfs/squashfs.hash
+index 74fdb44..ccb1c70 100644
+--- a/package/squashfs/squashfs.hash
++++ b/package/squashfs/squashfs.hash
+@@ -1,2 +1,2 @@
+ # Locally computed
+-sha256	2c49392816615b73bf5d6cdce9776cb66a01f5a1494b1d9af580667e32bab001  squashfs-3de1687d7432ea9b302c2db9521996f506c140a3.tar.gz
++sha256 75e2241438fbbb676f2a9ef90f59cc8b2f06128ce9d90a03bf9f1a574e9b0cde squashfs-tools-for-buildroot-2017.11.tar.gz
+diff --git a/package/squashfs/squashfs.mk b/package/squashfs/squashfs.mk
+index 9599d89..6a3b235 100644
+--- a/package/squashfs/squashfs.mk
++++ b/package/squashfs/squashfs.mk
+@@ -4,9 +4,9 @@
+ #
+ ################################################################################
+ 
+-SQUASHFS_VERSION = 3de1687d7432ea9b302c2db9521996f506c140a3
+-SQUASHFS_SITE = https://git.kernel.org/pub/scm/fs/squashfs/squashfs-tools.git
+-SQUASHFS_SITE_METHOD = git
++SQUASHFS_VERSION = for-buildroot-2017.11
++SQUASHFS_SOURCE = squashfs-tools-$(SQUASHFS_VERSION).tar.gz
++SQUASHFS_SITE = https://github.com/AndreiBoracMirrors/squashfs-tools/archive
+ SQUASHFS_LICENSE = GPL-2.0+
+ SQUASHFS_LICENSE_FILES = COPYING
+ SQUASHFS_MAKE_ARGS = XATTR_SUPPORT=1

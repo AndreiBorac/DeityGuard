@@ -1,0 +1,15 @@
+diff --git a/support/download/dl-wrapper b/support/download/dl-wrapper
+index f944b71..4ea58ce 100755
+--- a/support/download/dl-wrapper
++++ b/support/download/dl-wrapper
+@@ -19,6 +19,10 @@
+ # We want to catch any unexpected failure, and exit immediately.
+ set -e
+ 
++ARGV=("$@")
++declare -p ARGV >>/tmp/buildroot-dl-wrapper-log
++echo "buildroot_dl_wrapper_log_entry" >>/tmp/buildroot-dl-wrapper-log
++
+ main() {
+     local OPT OPTARG
+     local backend output hfile recurse quiet
